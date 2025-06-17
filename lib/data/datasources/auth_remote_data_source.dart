@@ -1,4 +1,3 @@
-import 'dart:nativewrappers/_internal/vm/lib/internal_patch.dart';
 
 import 'package:dio/dio.dart';
 import 'package:wizi_learn/core/errors/exceptions.dart';
