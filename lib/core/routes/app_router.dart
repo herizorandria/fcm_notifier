@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/dashboard_page.dart';
-import 'package:wizi_learn/features/auth/presentation/pages/home_page.dart';
 import '../constants/route_constants.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';

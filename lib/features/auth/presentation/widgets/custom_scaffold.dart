@@ -4,7 +4,6 @@ import 'custom_drawer.dart';
 import 'custom_bottom_navbar.dart';
 
 class CustomScaffold extends StatelessWidget {
-  final String title;
   final Widget body;
   final List<Widget>? actions;
   final int currentIndex;
@@ -12,7 +11,6 @@ class CustomScaffold extends StatelessWidget {
 
   const CustomScaffold({
     super.key,
-    required this.title,
     required this.body,
     required this.currentIndex,
     required this.onTabSelected,
@@ -23,7 +21,6 @@ class CustomScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: title,
         actions: actions,
       ),
       drawer: const CustomDrawer(),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wizi_learn/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:wizi_learn/features/auth/presentation/bloc/auth_state.dart';
-import '../widgets/custom_scaffold.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/home_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/quiz_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/training_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/tutorial_page.dart';
+import 'package:wizi_learn/features/auth/presentation/widgets/custom_scaffold.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -14,26 +15,25 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
-  final List<String> titles = [
-    'Accueil',
-    'Formation',
-    'Quiz',
-    'Classement',
-    'Tutoriel',
+  final List<Widget> titles = [
+    const Text("Accueil"),
+    const Text("Formation"),
+    const Text("Quiz"),
+    const Text("Classement"),
+    const Text("Tutoriel"),
   ];
 
   final List<Widget> _pages = [
-    const Center(child: Text("Accueil")),
-    const Center(child: Text("Formation")),
-    const Center(child: Text("Quiz")),
+    const HomePage(),
+    const TrainingPage(),
+    const QuizPage(),
     const Center(child: Text("Classement")),
-    const Center(child: Text("Tutoriel")),
+    const TutorialPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
-      title: titles[_currentIndex],
       body: _pages[_currentIndex],
       currentIndex: _currentIndex,
       onTabSelected: (index) {
