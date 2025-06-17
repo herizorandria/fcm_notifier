@@ -1,36 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wizi_learn/injection_container.dart';
-import 'package:wizi_learn/presentation/bloc/auth/auth_bloc.dart';
-import 'package:wizi_learn/route.dart';
+import 'package:wizi_learn/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:wizi_learn/features/auth/presentation/bloc/auth_event.dart';
+import 'core/routes/app_router.dart';
+import 'core/constants/route_constants.dart';
+import 'features/auth/auth_injection_container.dart' as auth_injection;
+import 'features/auth/data/repositories/auth_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final authBloc = await InjectionContainer.init();
 
-  runApp(MyApp(authBloc: authBloc));
+  // Initialize dependencies
+  await auth_injection.initAuthDependencies();
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final AuthBloc authBloc;
-
-  const MyApp({super.key, required this.authBloc});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider<AuthBloc>.value(value: authBloc),
-      ],
-      child: MaterialApp(
-        title: 'Wizi Learn',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
+        RepositoryProvider<AuthRepository>(
+          create: (context) => auth_injection.sl<AuthRepository>(),
         ),
-        initialRoute: AppRoutes.welcome,
-        onGenerateRoute: AppRoutes.generateRoute,
+      ],
+      child: BlocProvider<AuthBloc>(
+        create: (context) => AuthBloc(
+          authRepository: context.read<AuthRepository>(),
+        )..add(CheckAuthEvent()),
+        child: MaterialApp(
+          title: 'Wizi Learn',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          initialRoute: RouteConstants.splash,
+          onGenerateRoute: AppRouter.generateRoute,
+        ),
       ),
     );
   }
