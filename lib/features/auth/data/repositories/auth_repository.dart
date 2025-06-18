@@ -27,7 +27,15 @@ class AuthRepository implements AuthRepositoryContract {
     try {
       await remoteDataSource.logout();
     } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        // Token might be expired, but we still want to proceed with local logout
+        return;
+      }
       throw AuthException(e.message);
+    } finally {
+      // Always clear local storage even if logout fails
+      await storage.delete(key: 'auth_token');
+      await storage.delete(key: 'auth_user');
     }
   }
 

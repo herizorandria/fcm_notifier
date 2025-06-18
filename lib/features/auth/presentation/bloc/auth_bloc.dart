@@ -5,14 +5,20 @@ import 'package:wizi_learn/features/auth/data/repositories/auth_repository_contr
 import 'package:wizi_learn/features/auth/presentation/bloc/auth_event.dart';
 import 'package:wizi_learn/features/auth/presentation/bloc/auth_state.dart';
 
-
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepositoryContract authRepository;
+  StreamSubscription? _authSubscription;
 
   AuthBloc({required this.authRepository}) : super(AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<LogoutEvent>(_onLogout);
     on<CheckAuthEvent>(_onCheckAuth);
+  }
+
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
@@ -22,9 +28,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(Authenticated(user));
     } on AuthException catch (e) {
       emit(AuthError(e.message));
-      emit(Unauthenticated()); // Retour à l'état non authentifié après erreur
+      emit(Unauthenticated());
+    } on TimeoutException {
+      emit(AuthError('Timeout: Le serveur a mis trop de temps à répondre'));
+      emit(Unauthenticated());
     } catch (e) {
-      emit(AuthError('Une erreur inattendue est survenue'));
+      emit(AuthError('Une erreur inattendue est survenue: ${e.toString()}'));
       emit(Unauthenticated());
     }
   }
@@ -34,9 +43,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await authRepository.logout();
       emit(Unauthenticated());
+    } on AuthException catch (e) {
+      // Même en cas d'erreur, on considère l'utilisateur comme déconnecté
+      emit(Unauthenticated());
     } catch (e) {
-      emit(AuthError(e.toString()));
-      emit(Unauthenticated()); // Force la déconnexion même en cas d'erreur
+      // On force la déconnexion même en cas d'erreur inattendue
+      emit(Unauthenticated());
     }
   }
 
@@ -44,7 +56,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final isLoggedIn = await authRepository.isLoggedIn()
-          .timeout(const Duration(seconds: 5)); // Timeout après 5 secondes
+          .timeout(const Duration(seconds: 5));
 
       if (!isLoggedIn) {
         emit(Unauthenticated());
@@ -52,16 +64,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
 
       final user = await authRepository.getMe()
-          .timeout(const Duration(seconds: 5)); // Timeout pour getMe aussi
+          .timeout(const Duration(seconds: 5));
 
       emit(Authenticated(user));
     } on TimeoutException {
+      emit(AuthError('Timeout: Vérification de l\'authentification trop longue'));
       emit(Unauthenticated());
-    } on AuthException catch (_) {
+    } on AuthException catch (e) {
+      // Si getMe échoue avec une AuthException, on déconnecte proprement
       await authRepository.logout();
+      emit(AuthError(e.message));
       emit(Unauthenticated());
     } catch (e) {
-      emit(AuthError('Erreur inattendue'));
+      emit(AuthError('Erreur inattendue lors de la vérification: ${e.toString()}'));
       emit(Unauthenticated());
     }
   }

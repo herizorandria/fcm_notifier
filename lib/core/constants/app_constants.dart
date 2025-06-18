@@ -10,5 +10,8 @@ class AppConstants {
   static const String userKey = "auth_user";
   static const String catalogue_formation = "/catalogueFormations/formations";
   static const String contact = "/stagiaire/contacts";
+  static const String quizHistory = "/quiz/history";
+  static const String globalRanking = '/quiz/classement/global';
+  static const String quizStats = '/quiz/stats';
   static const Duration splashDuration = Duration(seconds: 2);
 }

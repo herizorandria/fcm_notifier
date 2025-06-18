@@ -5,4 +5,5 @@ class RouteConstants {
   static const String sponsorship = '/sponsorship';
   static const String userPoints = '/user-points';
   static const String notifications = '/notifications';
+  static const String classement = '/classement';
 }

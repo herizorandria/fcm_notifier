@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/dashboard_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/notifications_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/ranking_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/sponsor_ship_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/user_point_page.dart';
 import '../constants/route_constants.dart';
@@ -30,6 +31,9 @@ class AppRouter {
     // Nouvelle route pour les notifications
       case RouteConstants.notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsPage());
+
+      case RouteConstants.classement:
+        return MaterialPageRoute(builder: (_) => const RankingPage());
 
       default:
         return MaterialPageRoute(

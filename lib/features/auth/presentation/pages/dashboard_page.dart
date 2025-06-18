@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/home_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/quiz_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/ranking_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/training_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/tutorial_page.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/custom_scaffold.dart';
@@ -19,7 +20,7 @@ class _DashboardPageState extends State<DashboardPage> {
     const HomePage(),
     const TrainingPage(),
     const QuizPage(),
-    const Center(child: Text("Classement")),
+    const RankingPage(),
     const TutorialPage(),
   ];
 
