@@ -37,7 +37,7 @@ class SponsorshipPage extends StatelessWidget {
               'Parrainez vos amis et gagnez ensemble !',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: theme.primaryColor,
+                color: Color(0xFFFEB823),
               ),
             ),
             const SizedBox(height: 10),
@@ -204,7 +204,7 @@ class SponsorshipPage extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Color(0xFFFEB823),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -254,15 +254,15 @@ class SponsorshipPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          color: Color(0xFFFEB823).withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            color: Color(0xFFFEB823).withOpacity(0.3),
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 28, color: Theme.of(context).primaryColor),
+            Icon(icon, size: 28, color: Color(0xFFFEB823)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -272,7 +272,7 @@ class SponsorshipPage extends StatelessWidget {
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
+                      color: Color(0xFFFEB823),
                     ),
                   ),
                   const SizedBox(height: 4),
