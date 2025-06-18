@@ -1,89 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:wizi_learn/features/auth/presentation/widgets/custom_app_bar.dart';
-import 'package:wizi_learn/features/auth/presentation/widgets/custom_bottom_navbar.dart';
-import 'package:wizi_learn/features/auth/presentation/widgets/custom_drawer.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/home_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/quiz_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/training_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/tutorial_page.dart';
+import 'package:wizi_learn/features/auth/presentation/widgets/custom_scaffold.dart';
 
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
 
-class CustomScaffold extends StatelessWidget {
-  final Widget body;
-  final List<Widget>? actions;
-  final int currentIndex;
-  final Function(int) onTabSelected;
-  final bool showBanner;
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
 
-  const CustomScaffold({
-    super.key,
-    required this.body,
-    required this.currentIndex,
-    required this.onTabSelected,
-    this.actions,
-    this.showBanner = true,
-  });
+class _DashboardPageState extends State<DashboardPage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const HomePage(),
+    const TrainingPage(),
+    const QuizPage(),
+    const Center(child: Text("Classement")),
+    const TutorialPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        actions: [
-          // Icône points utilisateur
-          IconButton(
-            icon: Badge(
-              label: const Text('150'), // À remplacer par des données dynamiques
-              child: const Icon(Icons.monetization_on),
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, '/user-points');
-            },
-          ),
-          // Icône notifications
-          IconButton(
-            icon: Badge(
-              label: const Text('3'), // À remplacer par des données dynamiques
-              child: const Icon(Icons.notifications),
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, '/notifications');
-            },
-          ),
-          ...?actions, // Conserve les actions existantes
-        ],
-      ),
-      drawer: const CustomDrawer(),
-      body: Column(
-        children: [
-          // Bannière de parrainage
-          if (showBanner)
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/sponsorship');
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                width: double.infinity,
-                color: Colors.amber,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Parraine et gagne 50€ !',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Icon(Icons.arrow_forward, color: Colors.grey[800]),
-                  ],
-                ),
-              ),
-            ),
-          // Contenu principal
-          Expanded(child: body),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: currentIndex,
-        onTap: onTabSelected,
-      ),
+    return CustomScaffold(
+      body: _pages[_currentIndex],
+      currentIndex: _currentIndex,
+      onTabSelected: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      // Vous pouvez ajouter des actions personnalisées si nécessaire
+      actions: [
+        // Ajoutez d'autres actions ici si besoin
+      ],
+      // Contrôler l'affichage du bandeau (true par défaut dans l'implémentation)
+      showBanner: true,
     );
   }
 }
