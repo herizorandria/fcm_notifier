@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wizi_learn/features/auth/presentation/bloc/auth_event.dart';
 import 'package:wizi_learn/features/auth/presentation/bloc/auth_state.dart';
 import '../bloc/auth_bloc.dart';
 import '../../../../core/constants/route_constants.dart';
@@ -19,11 +20,13 @@ class _SplashPageState extends State<SplashPage>
   late final Animation<double> _fadeAnimation;
   late final Animation<Color?> _gradientAnimation;
   late final Animation<double> _textScaleAnimation;
+  late final AuthBloc _authBloc;
+  bool _authCheckCompleted = false;
 
   @override
   void initState() {
     super.initState();
-
+    _authBloc = context.read<AuthBloc>();
     _controller = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
@@ -80,6 +83,9 @@ class _SplashPageState extends State<SplashPage>
 
     // Démarrer l'animation principale
     _controller.forward();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _authBloc.add(CheckAuthEvent());
+    });
   }
 
   @override
@@ -93,9 +99,9 @@ class _SplashPageState extends State<SplashPage>
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is Authenticated) {
-          Navigator.pushReplacementNamed(context, RouteConstants.dashboard);
-        } else if (state is Unauthenticated) {
-          Navigator.pushReplacementNamed(context, RouteConstants.login);
+          _navigateToDashboard();
+        } else if (state is Unauthenticated || state is AuthError) {
+          _navigateToLogin();
         }
       },
       child: Scaffold(
@@ -228,5 +234,20 @@ class _SplashPageState extends State<SplashPage>
         ),
       ),
     );
+  }
+
+  void _navigateToDashboard() {
+    debugPrint('Navigation vers le dashboard');
+    if (!_authCheckCompleted) {
+      _authCheckCompleted = true;
+      Navigator.pushReplacementNamed(context, RouteConstants.dashboard);
+    }
+  }
+
+  void _navigateToLogin() {
+    if (!_authCheckCompleted) {
+      _authCheckCompleted = true;
+      Navigator.pushReplacementNamed(context, RouteConstants.login);
+    }
   }
 }

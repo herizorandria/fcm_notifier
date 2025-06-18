@@ -2,4 +2,7 @@ class RouteConstants {
   static const String splash = '/';
   static const String login = '/login';
   static const String dashboard = '/dashboard';
+  static const String sponsorship = '/sponsorship';
+  static const String userPoints = '/user-points';
+  static const String notifications = '/notifications';
 }

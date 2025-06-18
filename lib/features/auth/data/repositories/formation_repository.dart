@@ -9,7 +9,6 @@ class FormationRepository {
 
   Future<List<Formation>> getFormations() async {
     final response = await apiClient.get(AppConstants.catalogue_formation);
-    print(response);
     final data = response.data;
 
     if (data is List) {

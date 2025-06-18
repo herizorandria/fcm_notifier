@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
+import 'package:wizi_learn/core/exceptions/auth_exception.dart';
 import 'package:wizi_learn/features/auth/data/repositories/auth_repository_contract.dart';
 import 'package:wizi_learn/features/auth/presentation/bloc/auth_event.dart';
 import 'package:wizi_learn/features/auth/presentation/bloc/auth_state.dart';
@@ -20,8 +20,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await authRepository.login(event.email, event.password);
       emit(Authenticated(user));
+    } on AuthException catch (e) {
+      emit(AuthError(e.message));
+      emit(Unauthenticated()); // Retour à l'état non authentifié après erreur
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('Une erreur inattendue est survenue'));
+      emit(Unauthenticated());
     }
   }
 
@@ -32,21 +36,33 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(Unauthenticated());
     } catch (e) {
       emit(AuthError(e.toString()));
+      emit(Unauthenticated()); // Force la déconnexion même en cas d'erreur
     }
   }
 
   Future<void> _onCheckAuth(CheckAuthEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final isLoggedIn = await authRepository.isLoggedIn();
-      if (isLoggedIn) {
-        final user = await authRepository.getMe();
-        emit(Authenticated(user));
-      } else {
+      final isLoggedIn = await authRepository.isLoggedIn()
+          .timeout(const Duration(seconds: 5)); // Timeout après 5 secondes
+
+      if (!isLoggedIn) {
         emit(Unauthenticated());
+        return;
       }
+
+      final user = await authRepository.getMe()
+          .timeout(const Duration(seconds: 5)); // Timeout pour getMe aussi
+
+      emit(Authenticated(user));
+    } on TimeoutException {
+      emit(Unauthenticated());
+    } on AuthException catch (_) {
+      await authRepository.logout();
+      emit(Unauthenticated());
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('Erreur inattendue'));
+      emit(Unauthenticated());
     }
   }
 }

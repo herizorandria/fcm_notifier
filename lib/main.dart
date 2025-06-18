@@ -32,10 +32,12 @@ class MyApp extends StatelessWidget {
           authRepository: context.read<AuthRepository>(),
         )..add(CheckAuthEvent()),
         child: MaterialApp(
+
           title: 'Wizi Learn',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: Colors.white,
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
           initialRoute: RouteConstants.splash,

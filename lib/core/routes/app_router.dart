@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/dashboard_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/notifications_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/sponsor_ship_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/user_point_page.dart';
 import '../constants/route_constants.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
@@ -16,14 +19,25 @@ class AppRouter {
       case RouteConstants.dashboard:
         return MaterialPageRoute(builder: (_) => const DashboardPage());
 
+    // Nouvelle route pour le parrainage
+      case RouteConstants.sponsorship:
+        return MaterialPageRoute(builder: (_) => const SponsorshipPage());
+
+    // Nouvelle route pour les points utilisateur
+      case RouteConstants.userPoints:
+        return MaterialPageRoute(builder: (_) => const UserPointsPage());
+
+    // Nouvelle route pour les notifications
+      case RouteConstants.notifications:
+        return MaterialPageRoute(builder: (_) => const NotificationsPage());
+
       default:
         return MaterialPageRoute(
-          builder:
-              (_) => Scaffold(
-                body: Center(
-                  child: Text('No route defined for ${settings.name}'),
-                ),
-              ),
+          builder: (_) => Scaffold(
+            body: Center(
+              child: Text('No route defined for ${settings.name}'),
+            ),
+          ),
         );
     }
   }

@@ -96,7 +96,6 @@ class _TrainingPageState extends State<TrainingPage> {
                 child: GridView.count(
                   shrinkWrap: true,
                   crossAxisCount: 4,
-                  childAspectRatio: 0.8,
                   physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: 8,
                   crossAxisSpacing: 8,
@@ -204,7 +203,7 @@ class _TrainingPageState extends State<TrainingPage> {
 
                     final categoryFormations = categorySnapshot.data!;
                     return ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.only(bottom: 10),
                       itemCount: categoryFormations.length,
                       itemBuilder: (context, index) {
                         final formation = categoryFormations[index];
