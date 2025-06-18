@@ -84,9 +84,16 @@ class _TrainingPageState extends State<TrainingPage> {
           final formations = snapshot.data!;
           final categories = _getUniqueCategories(formations);
 
-          if (_selectedCategory == null && categories.isNotEmpty) {
-            _selectedCategory = categories.first;
+          if (_selectedCategory == null) {
+            if (categories.isNotEmpty) {
+              _selectedCategory = categories.first;
+            } else {
+              return const Center(
+                child: Text('Aucun catalogue de formation'),
+              );
+            }
           }
+
 
           return Column(
             children: [
@@ -182,9 +189,7 @@ class _TrainingPageState extends State<TrainingPage> {
                   future: _repository.getFormationsByCategory(_selectedCategory!),
                   builder: (context, categorySnapshot) {
                     if (categorySnapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     } else if (categorySnapshot.hasError) {
                       return Center(
                         child: Text(
@@ -192,11 +197,11 @@ class _TrainingPageState extends State<TrainingPage> {
                           style: const TextStyle(fontSize: 16),
                         ),
                       );
-                    } else if (!categorySnapshot.hasData || categorySnapshot.data!.isEmpty) {
-                      return Center(
+                    } else if (!categorySnapshot.hasData || categorySnapshot.data == null || categorySnapshot.data!.isEmpty) {
+                      return const Center(
                         child: Text(
-                          'Aucune formation dans cette catégorie',
-                          style: const TextStyle(fontSize: 16),
+                          'Aucun catalogue de formation',
+                          style: TextStyle(fontSize: 16),
                         ),
                       );
                     }
@@ -213,9 +218,7 @@ class _TrainingPageState extends State<TrainingPage> {
                           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius:
-                            BorderRadius.circular(
-                                20),
+                            borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: Colors.grey.shade200),
                             boxShadow: [
                               BoxShadow(
@@ -233,9 +236,7 @@ class _TrainingPageState extends State<TrainingPage> {
                               decoration: BoxDecoration(
                                 color: categoryColor.withOpacity(0.1),
                                 border: Border.all(color: categoryColor.withOpacity(0.3)),
-                                borderRadius:
-                                BorderRadius.circular(
-                                    12),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: formation.imageUrl != null
                                   ? Image.network(
@@ -272,16 +273,9 @@ class _TrainingPageState extends State<TrainingPage> {
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    Icon(
-                                      Icons.timer,
-                                      size: 16,
-                                      color: Colors.grey.shade600,
-                                    ),
+                                    Icon(Icons.timer, size: 16, color: Colors.grey.shade600),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      '${formation.duree}h',
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
+                                    Text('${formation.duree}h', style: const TextStyle(fontSize: 14)),
                                     const Spacer(),
                                     Text(
                                       '${formatPrice(formation.tarif)} €',
@@ -311,7 +305,7 @@ class _TrainingPageState extends State<TrainingPage> {
                     );
                   },
                 ),
-              ),
+              )
             ],
           );
         },

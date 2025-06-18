@@ -45,7 +45,7 @@ class UserModel extends Equatable {
       lastLoginAt: json['last_login_at'],
       lastActivityAt: json['last_activity_at'],
       lastLoginIp: json['last_login_ip'],
-      isOnline: json['is_online'],
+      isOnline: json['is_online'] == 1,
       stagiaire: json['stagiaire'] != null
           ? StagiaireModel.fromJson(json['stagiaire'])
           : null,

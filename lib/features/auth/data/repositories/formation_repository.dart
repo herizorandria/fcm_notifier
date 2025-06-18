@@ -33,4 +33,12 @@ class FormationRepository {
 
     return Formation.fromJson(data);
   }
+  // Dans FormationRepository
+  Future<List<Formation>> getRandomFormations(int count) async {
+    final allFormations = await getFormations();
+    // Mélange la liste
+    allFormations.shuffle();
+    // Prend les 'count' premiers
+    return allFormations.take(count).toList();
+  }
 }

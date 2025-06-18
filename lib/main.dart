@@ -32,7 +32,6 @@ class MyApp extends StatelessWidget {
           authRepository: context.read<AuthRepository>(),
         )..add(CheckAuthEvent()),
         child: MaterialApp(
-
           title: 'Wizi Learn',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
@@ -40,10 +39,22 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: Colors.white,
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
+          scrollBehavior: CustomScrollBehavior(), // 👈 Ajout du comportement de scroll personnalisé
           initialRoute: RouteConstants.splash,
           onGenerateRoute: AppRouter.generateRoute,
         ),
       ),
+    );
+  }
+}
+class CustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: Colors.orange.shade200,
+      child: child,
     );
   }
 }
