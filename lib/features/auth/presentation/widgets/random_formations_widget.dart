@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wizi_learn/core/constants/app_constants.dart';
 import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/detail_formation_page.dart';
@@ -153,7 +154,7 @@ class RandomFormationsWidget extends StatelessWidget {
                       maxHeight: 50, // Hauteur maximale pour 2 lignes
                     ),
                     child: Text(
-                      formation.titre,
+                      formation.titre.toUpperCase(),
                       style: textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -174,14 +175,14 @@ class RandomFormationsWidget extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${formation.duree}h',
+                        '${formation.duree} H',
                         style: textTheme.bodySmall?.copyWith(
                           color: Colors.grey.shade700,
                         ),
                       ),
                       const Spacer(),
                       Text(
-                        '${formation.tarif}€',
+                        '${formation.tarif.toInt()} €',
                         style: textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.amber.shade700,
@@ -215,9 +216,15 @@ class RandomFormationsWidget extends StatelessWidget {
                             side: BorderSide(color: categoryColor, width: 0.5),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           final pdfUrl = '${AppConstants.baseUrlImg}/${formation.cursusPdf}';
-                          // TODO: Ouvrir le PDF
+                          if (await canLaunch(pdfUrl)) {
+                            await launch(pdfUrl);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Impossible d\'ouvrir le PDF.')),
+                            );
+                          }
                         },
                       ),
                     ),
