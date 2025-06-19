@@ -34,6 +34,7 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFFFEB823),
         title: const Text('Détails de la formation'),
         elevation: 0,
       ),
@@ -139,7 +140,7 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
-                                    '${formatPrice(formation.tarif)} €',
+                                    '${formation.tarif.toInt()} €',
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -210,17 +211,17 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      icon: Icon(Icons.picture_as_pdf, color: categoryColor),
+                      icon: Icon(Icons.picture_as_pdf, color: Color(0xFFFEB823)),
                       label: Text(
                         'Voir le programme complet (PDF)',
-                        style: TextStyle(color: categoryColor),
+                        style: TextStyle(color: Color(0xFFFEB823)),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: categoryColor.withOpacity(0.1),
+                        backgroundColor: Color(0xFFFEB823).withOpacity(0.1),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: categoryColor),
+                          side: BorderSide(color: Color(0xFFFEB823)),
                         ),
                       ),
                       onPressed: () {
@@ -237,13 +238,13 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: categoryColor,
+                      backgroundColor: const Color(0xFFB07661),
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 2,
-                      shadowColor: categoryColor.withOpacity(0.3),
+                      shadowColor: const Color(0xFFB07661).withOpacity(0.3),
                     ),
                     onPressed: () {
                       // TODO: Gérer l'inscription

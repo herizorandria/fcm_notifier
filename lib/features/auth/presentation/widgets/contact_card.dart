@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wizi_learn/features/auth/data/models/contact_model.dart';
 
 class ContactCard extends StatelessWidget {
@@ -66,11 +67,46 @@ class ContactCard extends StatelessWidget {
                       children: [
                         Icon(Icons.phone_android, size: 16, color: Colors.grey.shade600),
                         const SizedBox(width: 6),
-                        Text(
-                          contact.telephone,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade700,
+                        GestureDetector(
+                          onTap: () async {
+                            final telUrl = Uri(scheme: 'tel', path: contact.telephone);
+                            if (await canLaunchUrl(telUrl)) {
+                              await launchUrl(telUrl);
+                            }
+                          },
+                          child: Text(
+                            contact.telephone,
+                            style: TextStyle(
+                              fontSize: 13,
+                              // color: Colors.blue.shade700,
+                              // decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.email, size: 16, color: Colors.grey.shade600),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: () async {
+                            final mailUrl = Uri(
+                              scheme: 'mailto',
+                              path: contact.user.email,
+                            );
+                            if (await canLaunchUrl(mailUrl)) {
+                              await launchUrl(mailUrl);
+                            }
+                          },
+                          child: Text(
+                            contact.user.email,
+                            style: TextStyle(
+                              fontSize: 13,
+                              // color: Colors.blue.shade700,
+                              // decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ],
