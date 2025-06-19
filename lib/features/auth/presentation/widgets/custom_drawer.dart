@@ -18,7 +18,6 @@ class CustomDrawer extends StatelessWidget {
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is Authenticated) {
-                print(debugPrint);
                 return UserAccountsDrawerHeader(
                   decoration: const BoxDecoration(
                     color: Color(0xFFFEB823), // Couleur de fond personnalisée

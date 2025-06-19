@@ -33,24 +33,28 @@ class UserModel extends Equatable {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final userJson = json['user'] ?? {};
+    final stagiaireJson = json['stagiaire'];
+
     return UserModel(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      emailVerifiedAt: json['email_verified_at'],
-      role: json['role'],
-      image: json['image'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      lastLoginAt: json['last_login_at'],
-      lastActivityAt: json['last_activity_at'],
-      lastLoginIp: json['last_login_ip'],
-      isOnline: json['is_online'] == 1,
-      stagiaire: json['stagiaire'] != null
-          ? StagiaireModel.fromJson(json['stagiaire'])
+      id: userJson['id'],
+      name: userJson['name'],
+      email: userJson['email'],
+      emailVerifiedAt: userJson['email_verified_at'],
+      role: userJson['role'],
+      image: userJson['image'],
+      createdAt: userJson['created_at'],
+      updatedAt: userJson['updated_at'],
+      lastLoginAt: userJson['last_login_at'],
+      lastActivityAt: userJson['last_activity_at'],
+      lastLoginIp: userJson['last_login_ip'],
+      isOnline: userJson['is_online'] == 1,
+      stagiaire: stagiaireJson != null
+          ? StagiaireModel.fromJson(stagiaireJson)
           : null,
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {
