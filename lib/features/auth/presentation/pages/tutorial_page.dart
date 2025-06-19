@@ -6,6 +6,7 @@ import 'package:wizi_learn/features/auth/data/models/formation_with_medias.dart'
 import 'package:wizi_learn/features/auth/data/repositories/media_repository.dart';
 import 'package:wizi_learn/features/auth/data/repositories/auth_repository.dart';
 import 'package:wizi_learn/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:wizi_learn/features/auth/presentation/constants/couleur_palette.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/youtube_player_page.dart';
 
 class TutorialPage extends StatefulWidget {
@@ -78,10 +79,12 @@ class _TutorialPageState extends State<TutorialPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Médias par formation"),
+        backgroundColor: AppColors.background,
+        title: const Text("Tutos et Astuces"),
+        elevation: 1,
         centerTitle: true,
-        elevation: 0,
       ),
+
       body: FutureBuilder<List<FormationWithMedias>>(
         future: _formationsFuture,
         builder: (context, snapshot) {

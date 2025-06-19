@@ -6,6 +6,7 @@ import 'package:wizi_learn/core/constants/app_constants.dart';
 import 'package:wizi_learn/core/network/api_client.dart';
 import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
 import 'package:wizi_learn/features/auth/data/repositories/formation_repository.dart';
+import 'package:wizi_learn/features/auth/presentation/constants/couleur_palette.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/detail_formation_page.dart';
 
 class TrainingPage extends StatefulWidget {
@@ -43,7 +44,7 @@ class _TrainingPageState extends State<TrainingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFFEB823),
+        backgroundColor: AppColors.background,
         title: const Text(
           'Notre catalogue de formations',
           style: TextStyle(

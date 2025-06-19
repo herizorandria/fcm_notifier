@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wizi_learn/features/auth/presentation/constants/couleur_palette.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
@@ -14,7 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 1,
-      backgroundColor: const Color(0xFFFFE082),
+      backgroundColor: AppColors.primary,
       centerTitle: true,
       title: title != null
           ? Text(

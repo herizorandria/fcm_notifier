@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:wizi_learn/core/network/api_client.dart';
 import 'package:wizi_learn/features/auth/data/models/stats_model.dart';
 import 'package:wizi_learn/features/auth/data/repositories/stats_repository.dart';
+import 'package:wizi_learn/features/auth/presentation/constants/couleur_palette.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/global_rankig_widget.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/quiz_history_widget.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/quiz_stats_widget.dart';
@@ -132,7 +133,7 @@ class _RankingAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: Colors.black87,
         ),
       ),
-      backgroundColor: const Color(0xFFFEB823),
+      backgroundColor: AppColors.background,
       elevation: 1,
       centerTitle: true,
     );
