@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wizi_learn/core/constants/app_constants.dart';
 import 'package:wizi_learn/core/network/api_client.dart';
 import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
@@ -34,6 +35,7 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFFFEB823),
         title: const Text('Détails de la formation'),
         elevation: 0,
       ),
@@ -111,41 +113,97 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        formation.titre,
+                                        formation.titre.toUpperCase(),
                                         style: theme.textTheme.headlineSmall?.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      Chip(
-                                        backgroundColor: categoryColor.withOpacity(0.2),
-                                        label: Text(
-                                          formation.category.categorie,
-                                          style: TextStyle(
-                                            color: categoryColor,
-                                            fontWeight: FontWeight.bold,
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Catégorie : ',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
                                           ),
-                                        ),
+                                          Chip(
+                                            backgroundColor: categoryColor.withOpacity(0.2),
+                                            label: Text(
+                                              formation.category.categorie,
+                                              style: TextStyle(
+                                                color: categoryColor,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Certificat : ',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          if (formation.certification != null && formation.certification!.isNotEmpty)
+                                            Row(
+                                              children: [
+                                                Icon(Icons.verified, color: categoryColor, size: 18),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  formation.certification!,
+                                                  style: TextStyle(
+                                                    color: categoryColor,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          else
+                                            const Text('Aucun'),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
                                 // Prix en badge mis en valeur
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: categoryColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    '${formatPrice(formation.tarif)} €',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    // const Text(
+                                    //   'Tarif :',
+                                    //   style: TextStyle(fontWeight: FontWeight.bold),
+                                    // ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: categoryColor,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${formation.tarif.toInt()} €',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(height: 8),
+                                    // Row(
+                                    //   mainAxisSize: MainAxisSize.min,
+                                    //   children: [
+                                    //     const Text(
+                                    //       'Durée : ',
+                                    //       style: TextStyle(fontWeight: FontWeight.bold),
+                                    //     ),
+                                    //     Text(
+                                    //       '${formation.duree}h',
+                                    //       style: const TextStyle(fontWeight: FontWeight.bold),
+                                    //     ),
+                                    //   ],
+                                    // ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -155,17 +213,26 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                               spacing: 16,
                               runSpacing: 8,
                               children: [
-                                _buildFeatureChip(
-                                  icon: Icons.timer,
-                                  value: '${formation.duree}h',
-                                  color: categoryColor,
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Durée : ',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    _buildFeatureChip(
+                                      color: const Color(0xFFB07661),
+                                      icon: Icons.timer,
+                                      value: 'à partir de ${formation.duree} h',
+                                    ),
+                                  ],
                                 ),
-                                if (formation.certification != null)
-                                  _buildFeatureChip(
-                                    icon: Icons.verified,
-                                    value: formation.certification!,
-                                    color: categoryColor,
-                                  ),
+                                // if (formation.certification != null)
+                                //   _buildFeatureChip(
+                                //     icon: Icons.verified,
+                                //     value: formation.certification!,
+                                //     color: categoryColor,
+                                //   ),
                               ],
                             ),
                           ],
@@ -210,22 +277,28 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      icon: Icon(Icons.picture_as_pdf, color: categoryColor),
+                      icon: Icon(Icons.picture_as_pdf, color: Color(0xFFFEB823)),
                       label: Text(
                         'Voir le programme complet (PDF)',
-                        style: TextStyle(color: categoryColor),
+                        style: TextStyle(color: Color(0xFFFEB823)),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: categoryColor.withOpacity(0.1),
+                        backgroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: categoryColor),
+                          side: BorderSide(color: Color(0xFFFEB823)),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         final pdfUrl = '${AppConstants.baseUrlImg}/${formation.cursusPdf}';
-                        // TODO: Ouvrir le PDF
+                        if (await canLaunch(pdfUrl)) {
+                          await launch(pdfUrl);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Impossible d\'ouvrir le PDF.')),
+                          );
+                        }
                       },
                     ),
                   ),
@@ -237,13 +310,13 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: categoryColor,
+                      backgroundColor: const Color(0xFFB07661),
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 2,
-                      shadowColor: categoryColor.withOpacity(0.3),
+                      shadowColor: const Color(0xFFB07661).withOpacity(0.3),
                     ),
                     onPressed: () {
                       // TODO: Gérer l'inscription

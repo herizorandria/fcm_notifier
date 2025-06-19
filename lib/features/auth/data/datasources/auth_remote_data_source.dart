@@ -52,7 +52,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     } catch (e) {
-      throw ApiException(message: 'Erreur inconnue: ${e.toString()}');
+      // throw ApiException(message: 'Erreur inconnue: ${e.toString()}');
+       throw ApiException(message: 'Vérifiez vos identifiants et réessayez. Si le problème persiste, contactez le support technique.' );
     }
   }
 

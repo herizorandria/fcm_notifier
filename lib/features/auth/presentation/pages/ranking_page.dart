@@ -46,7 +46,7 @@ class _RankingPageState extends State<RankingPage> {
             color: Colors.black87,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFFEB823),
         elevation: 1,
         centerTitle: true,
       ),
