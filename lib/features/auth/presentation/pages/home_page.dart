@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                       'Mes contacts',
                       style: TextStyle(
                         fontSize: 18,
-                        color: Colors.brown.shade400,
+                        color: const Color(0xFFB07661),
                         fontWeight: FontWeight.bold,
                       ),
                     ),

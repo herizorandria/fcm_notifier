@@ -112,63 +112,203 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        formation.titre,
+                                        formation.titre.toUpperCase(),
                                         style: theme.textTheme.headlineSmall?.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      Chip(
-                                        backgroundColor: categoryColor.withOpacity(0.2),
-                                        label: Text(
-                                          formation.category.categorie,
-                                          style: TextStyle(
-                                            color: categoryColor,
-                                            fontWeight: FontWeight.bold,
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Catégorie : ',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
                                           ),
-                                        ),
+                                          Chip(
+                                            backgroundColor: categoryColor.withOpacity(0.2),
+                                            label: Text(
+                                              formation.category.categorie,
+                                              style: TextStyle(
+                                                color: categoryColor,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Certificat : ',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          if (formation.certification != null && formation.certification!.isNotEmpty)
+                                            Row(
+                                              children: [
+                                                Icon(Icons.verified, color: categoryColor, size: 18),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  formation.certification!,
+                                                  style: TextStyle(
+                                                    color: categoryColor,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          else
+                                            const Text('Aucun'),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
-                                // Prix en badge mis en valeur
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: categoryColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    '${formation.tarif.toInt()} €',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                // Prix en badge mis en valeur + durée
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    const Text(
+                                      'Tarif :',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     ),
-                                  ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: categoryColor,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${formation.tarif.toInt()} €',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          'Durée : ',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          '${formation.duree}h',
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-                            // Durée et certification
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 8,
+                            // Détails formation avec libellés
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildFeatureChip(
-                                  icon: Icons.timer,
-                                  value: '${formation.duree}h',
-                                  color: categoryColor,
-                                ),
-                                if (formation.certification != null)
-                                  _buildFeatureChip(
-                                    icon: Icons.verified,
-                                    value: formation.certification!,
-                                    color: categoryColor,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        formation.titre.toUpperCase(),
+                                        style: theme.textTheme.headlineSmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Catégorie : ',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          Chip(
+                                            backgroundColor: categoryColor.withOpacity(0.2),
+                                            label: Text(
+                                              formation.category.categorie,
+                                              style: TextStyle(
+                                                color: categoryColor,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            'Certificat : ',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          if (formation.certification != null && formation.certification!.isNotEmpty)
+                                            Row(
+                                              children: [
+                                                Icon(Icons.verified, color: categoryColor, size: 18),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  formation.certification!,
+                                                  style: TextStyle(
+                                                    color: categoryColor,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          else
+                                            const Text('Aucun'),
+                                        ],
+                                      ),
+                                    ],
                                   ),
+                                ),
+                                // Prix en badge mis en valeur + durée
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    const Text(
+                                      'Tarif :',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: categoryColor,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${formation.tarif.toInt()} €',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          'Durée : ',
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          '${formation.duree}h',
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
+                            const SizedBox(height: 16),
                           ],
                         ),
                       ),
@@ -217,7 +357,7 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                         style: TextStyle(color: Color(0xFFFEB823)),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFFEB823).withOpacity(0.1),
+                        backgroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

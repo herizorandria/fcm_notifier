@@ -123,8 +123,8 @@ class RandomFormationsWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    formation.titre,
+                    Text(
+                    formation.titre.toUpperCase(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
