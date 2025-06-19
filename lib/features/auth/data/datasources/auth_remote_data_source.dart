@@ -23,11 +23,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> login(String email, String password) async {
     try {
       final response = await apiClient.post(
-        AppConstants.loginEndpoint,
-        data: {
-          'email': email,
-          'password': password,
-        }
+          AppConstants.loginEndpoint,
+          data: {
+            'email': email,
+            'password': password,
+          }
       );
 
       if (response.statusCode != 200) {
@@ -37,25 +37,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
 
-      final token = response.data['token'];
-      if (token == null) {
-        throw ApiException(message: 'Token non reçu');
+      final responseData = response.data as Map<String, dynamic>;
+
+      // Validation du token
+      final token = responseData['token'] as String?;
+      if (token == null || token.isEmpty) {
+        throw ApiException(message: 'Token non reçu ou invalide');
       }
 
       await storage.write(key: AppConstants.tokenKey, value: token);
 
-      if (response.data['user'] == null) {
+      // Validation des données utilisateur
+      if (responseData['user'] == null) {
         throw ApiException(message: 'Données utilisateur manquantes');
       }
 
-      return UserModel.fromJson(response.data['user']);
+      return UserModel.fromJson(responseData);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     } catch (e) {
-      throw ApiException(message: 'Erreur inconnue: ${e.toString()}');
+      throw ApiException(message: 'Erreur lors de la connexion: ${e.toString()}');
     }
   }
-
 
   @override
   Future<void> logout() async {

@@ -33,22 +33,22 @@ class UserModel extends Equatable {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    final userJson = json['user'] ?? {};
-    final stagiaireJson = json['stagiaire'];
+    final userJson = json['user'] as Map<String, dynamic>? ?? {};
+    final stagiaireJson = json['stagiaire'] as Map<String, dynamic>?;
 
     return UserModel(
-      id: userJson['id'],
-      name: userJson['name'],
-      email: userJson['email'],
-      emailVerifiedAt: userJson['email_verified_at'],
-      role: userJson['role'],
-      image: userJson['image'],
-      createdAt: userJson['created_at'],
-      updatedAt: userJson['updated_at'],
-      lastLoginAt: userJson['last_login_at'],
-      lastActivityAt: userJson['last_activity_at'],
-      lastLoginIp: userJson['last_login_ip'],
-      isOnline: userJson['is_online'] == 1,
+      id: (userJson['id'] as int?) ?? 0, // ou lancez une exception si c'est requis
+      name: (userJson['name'] as String?) ?? '',
+      email: (userJson['email'] as String?) ?? '',
+      emailVerifiedAt: userJson['email_verified_at'] as String?,
+      role: (userJson['role'] as String?) ?? 'user',
+      image: userJson['image'] as String?,
+      createdAt: (userJson['created_at'] as String?) ?? '',
+      updatedAt: (userJson['updated_at'] as String?) ?? '',
+      lastLoginAt: userJson['last_login_at'] as String?,
+      lastActivityAt: userJson['last_activity_at'] as String?,
+      lastLoginIp: userJson['last_login_ip'] as String?,
+      isOnline: (userJson['is_online'] as int?) == 1, // Conversion explicite
       stagiaire: stagiaireJson != null
           ? StagiaireModel.fromJson(stagiaireJson)
           : null,
