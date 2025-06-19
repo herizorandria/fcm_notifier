@@ -6,6 +6,7 @@ import 'package:wizi_learn/features/auth/data/models/contact_model.dart';
 import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
 import 'package:wizi_learn/features/auth/data/repositories/contact_repository.dart';
 import 'package:wizi_learn/features/auth/data/repositories/formation_repository.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/contact_page.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/contact_card.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/random_formations_widget.dart';
 
@@ -97,12 +98,29 @@ class _HomePageState extends State<HomePage> {
             SliverPadding(
               padding: const EdgeInsets.all(16.0),
               sliver: SliverToBoxAdapter(
-                child: const Text(
-                  'Nos contacts',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Mes contacts',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: const Color(0xFFB07661),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ContactPage(contacts: _contacts),
+                          ),
+                        );
+                      },
+                      child: const Text('Voir tous'),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -111,12 +129,22 @@ class _HomePageState extends State<HomePage> {
                 child: const Center(child: Text('Aucun contact disponible')),
               )
             else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) => ContactCard(contact: _contacts[index]),
-                  childCount: _contacts.length,
-                ),
-              ),
+              (() {
+                final wantedRoles = ['commercial', 'formateur', 'pole_relation_client'];
+                final filteredContacts = <String, Contact>{};
+                for (final c in _contacts) {
+                  if (wantedRoles.contains(c.role) && !filteredContacts.containsKey(c.role)) {
+                    filteredContacts[c.role] = c;
+                  }
+                }
+                final contactsToShow = filteredContacts.values.toList();
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => ContactCard(contact: contactsToShow[index]),
+                    childCount: contactsToShow.length,
+                  ),
+                );
+              })(),
           ],
         ),
       ),

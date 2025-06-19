@@ -43,15 +43,15 @@ class _TrainingPageState extends State<TrainingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFFFEB823),
         title: const Text(
-          'Nos Formations',
+          'Notre catalogue de formations',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
         ),
-        backgroundColor: Colors.white,
         elevation: 1,
         centerTitle: true,
       ),

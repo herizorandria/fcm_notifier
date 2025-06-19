@@ -12,6 +12,7 @@ class SponsorshipPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFFFEB823),
         title: const Text('Programme de Parrainage'),
         centerTitle: true,
         elevation: 0,
