@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wizi_learn/core/constants/app_constants.dart';
 import 'package:wizi_learn/core/network/api_client.dart';
 import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
@@ -289,9 +290,15 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                           side: BorderSide(color: Color(0xFFFEB823)),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         final pdfUrl = '${AppConstants.baseUrlImg}/${formation.cursusPdf}';
-                        // TODO: Ouvrir le PDF
+                        if (await canLaunch(pdfUrl)) {
+                          await launch(pdfUrl);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Impossible d\'ouvrir le PDF.')),
+                          );
+                        }
                       },
                     ),
                   ),
