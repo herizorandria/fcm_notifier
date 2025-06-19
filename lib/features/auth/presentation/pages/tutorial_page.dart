@@ -106,109 +106,103 @@ class _TutorialPageState extends State<TutorialPage> {
 
           return Column(
             children: [
-              // Section Filtre Formation
+              // Section Filtres combinés
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: DropdownButton<int>(
-                      isExpanded: true,
-                      value: _selectedFormationId ?? selectedFormation.id,
-                      items: formations.map((formation) {
-                        return DropdownMenuItem<int>(
-                          value: formation.id,
-                          child: Text(
-                            formation.titre,
-                            style: theme.textTheme.bodyLarge,
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                child: Row(
+                  children: [
+                    // Filtre Formation
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: DropdownButton<int>(
+                            isExpanded: true,
+                            value: _selectedFormationId ?? selectedFormation.id,
+                            items: formations.map((formation) {
+                              return DropdownMenuItem<int>(
+                                value: formation.id,
+                                child: Text(
+                                  formation.titre,
+                                  style: theme.textTheme.bodyMedium,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedFormationId = value;
+                              });
+                            },
+                            underline: const SizedBox(),
+                            icon: Icon(Icons.arrow_drop_down, color: colorScheme.primary, size: 24),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedFormationId = value;
-                        });
-                      },
-                      underline: const SizedBox(),
-                      icon: Icon(Icons.arrow_drop_down, color: colorScheme.primary),
-                      borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
 
-              // Section Filtre Catégorie
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('Tutoriels'),
-                          selected: _selectedCategory == 'tutoriel',
-                          onSelected: (selected) {
+                    const SizedBox(width: 8),
+
+                    // Filtres Catégorie
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ToggleButtons(
+                          isSelected: [
+                            _selectedCategory == 'tutoriel',
+                            _selectedCategory == 'astuce',
+                          ],
+                          onPressed: (index) {
                             setState(() {
-                              _selectedCategory = 'tutoriel';
+                              _selectedCategory = index == 0 ? 'tutoriel' : 'astuce';
                             });
                           },
-                          selectedColor: colorScheme.primary.withOpacity(0.2),
-                          labelStyle: TextStyle(
-                            color: _selectedCategory == 'tutoriel'
-                                ? colorScheme.primary
-                                : theme.textTheme.bodyLarge?.color,
-                            fontWeight: FontWeight.w500,
+                          borderRadius: BorderRadius.circular(12),
+                          selectedColor: Colors.white,
+                          fillColor: Color(0xFFFEB823),
+                          color: Color(0xFF181818),
+                          constraints: const BoxConstraints(
+                            minHeight: 40,
+                            minWidth: 0,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          children: const [
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text('Tutos'),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text('Astuces'),
+                            ),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('Astuces'),
-                          selected: _selectedCategory == 'astuce',
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedCategory = 'astuce';
-                            });
-                          },
-                          selectedColor: colorScheme.primary.withOpacity(0.2),
-                          labelStyle: TextStyle(
-                            color: _selectedCategory == 'astuce'
-                                ? colorScheme.primary
-                                : theme.textTheme.bodyLarge?.color,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -246,6 +240,7 @@ class _TutorialPageState extends State<TutorialPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        color: const Color(0xFFFFF9C4), // Jaune clair
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
                           onTap: () {
@@ -267,13 +262,13 @@ class _TutorialPageState extends State<TutorialPage> {
                                   width: 60,
                                   height: 60,
                                   decoration: BoxDecoration(
-                                    color: colorScheme.primary.withOpacity(0.1),
+                                    color: const Color(0xFFFFEB3B).withOpacity(0.8), // Jaune plus vif
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.play_circle_filled,
                                     size: 32,
-                                    color: colorScheme.primary,
+                                    color: Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -284,7 +279,7 @@ class _TutorialPageState extends State<TutorialPage> {
                                       Text(
                                         media.titre,
                                         style: theme.textTheme.bodyLarge?.copyWith(
-                                          fontWeight: FontWeight.w500,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -293,7 +288,7 @@ class _TutorialPageState extends State<TutorialPage> {
                                       Text(
                                         media.url,
                                         style: theme.textTheme.bodySmall?.copyWith(
-                                          color: colorScheme.onSurface.withOpacity(0.6),
+                                          color: Colors.black54,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -301,9 +296,9 @@ class _TutorialPageState extends State<TutorialPage> {
                                     ],
                                   ),
                                 ),
-                                Icon(
+                                const Icon(
                                   Icons.chevron_right,
-                                  color: colorScheme.onSurface.withOpacity(0.4),
+                                  color: Colors.black54,
                                 ),
                               ],
                             ),

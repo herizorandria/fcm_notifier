@@ -7,7 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     super.key,
     this.actions,
-    this.title,
+    this.title, required Color backgroundColor, required Color foregroundColor,
   });
 
   @override

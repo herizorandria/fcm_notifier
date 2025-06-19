@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wizi_learn/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:wizi_learn/features/auth/presentation/bloc/auth_event.dart';
+import 'package:wizi_learn/features/auth/presentation/constants/couleur_palette.dart';
 import 'core/routes/app_router.dart';
 import 'core/constants/route_constants.dart';
 import 'features/auth/auth_injection_container.dart' as auth_injection;
@@ -15,6 +16,7 @@ Future<void> main() async {
 
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,11 +37,82 @@ class MyApp extends StatelessWidget {
           title: 'Wizi Learn',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            brightness: Brightness.light,
-            scaffoldBackgroundColor: Colors.white,
+            colorScheme: ColorScheme(
+              primary: AppColors.primary,
+              primaryContainer: AppColors.primaryDark,
+              secondary: AppColors.secondary,
+              secondaryContainer: AppColors.secondary.withOpacity(0.8),
+              surface: AppColors.surface,
+              background: AppColors.background,
+              error: AppColors.error,
+              onPrimary: AppColors.onPrimary,
+              onSecondary: AppColors.onSecondary,
+              onSurface: AppColors.onSurface,
+              onBackground: AppColors.onBackground,
+              onError: AppColors.onError,
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: AppColors.background,
+            appBarTheme: AppBarTheme(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              elevation: 4,
+              centerTitle: true,
+              titleTextStyle: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.onPrimary,
+              ),
+            ),
+            bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              backgroundColor: AppColors.surface,
+              selectedItemColor: AppColors.primary,
+              unselectedItemColor: Colors.grey.shade600,
+              elevation: 8,
+            ),
+            cardTheme: CardThemeData(
+              color: AppColors.surface,
+              elevation: 2,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+              ),
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: BorderSide(color: AppColors.primary),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
             visualDensity: VisualDensity.adaptivePlatformDensity,
+            useMaterial3: true, // Pour Material 3
           ),
-          scrollBehavior: CustomScrollBehavior(), // 👈 Ajout du comportement de scroll personnalisé
+          scrollBehavior: CustomScrollBehavior(),
           initialRoute: RouteConstants.splash,
           onGenerateRoute: AppRouter.generateRoute,
         ),
@@ -47,6 +120,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 class CustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Widget buildOverscrollIndicator(

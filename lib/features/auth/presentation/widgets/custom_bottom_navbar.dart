@@ -8,7 +8,7 @@ class CustomBottomNavBar extends StatelessWidget {
   const CustomBottomNavBar({
     super.key,
     required this.currentIndex,
-    required this.onTap,
+    required this.onTap, required Color backgroundColor, required Color selectedColor, required Color unselectedColor,
   });
 
   @override

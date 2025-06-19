@@ -36,8 +36,18 @@ class UserModel extends Equatable {
     final userJson = json['user'] as Map<String, dynamic>? ?? {};
     final stagiaireJson = json['stagiaire'] as Map<String, dynamic>?;
 
+    // Gestion robuste de is_online
+    bool isOnline;
+    if (userJson['is_online'] is bool) {
+      isOnline = userJson['is_online'] as bool;
+    } else if (userJson['is_online'] is int) {
+      isOnline = (userJson['is_online'] as int) == 1;
+    } else {
+      isOnline = false; // Valeur par défaut si le type est inattendu
+    }
+
     return UserModel(
-      id: (userJson['id'] as int?) ?? 0, // ou lancez une exception si c'est requis
+      id: (userJson['id'] as int?) ?? 0,
       name: (userJson['name'] as String?) ?? '',
       email: (userJson['email'] as String?) ?? '',
       emailVerifiedAt: userJson['email_verified_at'] as String?,
@@ -48,13 +58,12 @@ class UserModel extends Equatable {
       lastLoginAt: userJson['last_login_at'] as String?,
       lastActivityAt: userJson['last_activity_at'] as String?,
       lastLoginIp: userJson['last_login_ip'] as String?,
-      isOnline: (userJson['is_online'] as int?) == 1, // Conversion explicite
+      isOnline: isOnline, // Utilisation de la valeur convertie
       stagiaire: stagiaireJson != null
           ? StagiaireModel.fromJson(stagiaireJson)
           : null,
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {

@@ -21,31 +21,34 @@ class CustomScaffold extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: CustomAppBar(
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
         actions: [
-          // Icône points utilisateur
           IconButton(
             icon: Badge(
-              label: const Text('15'), // À remplacer par des données dynamiques
+              label: const Text('15'),
               child: const Icon(Icons.star),
             ),
             onPressed: () {
               Navigator.pushNamed(context, RouteConstants.userPoints);
             },
           ),
-          // Icône notifications
           IconButton(
             icon: Badge(
-              label: const Text('3'), // À remplacer par des données dynamiques
+              label: const Text('3'),
               child: const Icon(Icons.notifications),
             ),
             onPressed: () {
               Navigator.pushNamed(context, RouteConstants.notifications);
             },
           ),
-          ...?actions, // Conserve les actions existantes
+          ...?actions,
         ],
       ),
       drawer: const CustomDrawer(),
@@ -60,44 +63,46 @@ class CustomScaffold extends StatelessWidget {
                 margin: const EdgeInsets.all(12),
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Color(0xFFFEB823),
+                  color: theme.colorScheme.primary, // Utilisation de la couleur primaire
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 6,
-                      offset: Offset(0, 3),
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.card_giftcard, size: 30, color: Colors.white),
+                    Icon(Icons.card_giftcard, size: 30, color: theme.colorScheme.onPrimary),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Parraine et gagne 50€ !',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.white,
+                          color: theme.colorScheme.onPrimary,
                         ),
                       ),
                     ),
-                    Icon(Icons.arrow_forward_ios, color: Colors.white),
+                    Icon(Icons.arrow_forward_ios, color: theme.colorScheme.onPrimary),
                   ],
                 ),
               ),
             ),
-
-          // Contenu principal
           Expanded(child: body),
         ],
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: currentIndex,
         onTap: onTabSelected,
+        backgroundColor: theme.colorScheme.surface,
+        selectedColor: theme.colorScheme.primary,
+        unselectedColor: Colors.grey.shade600,
       ),
     );
   }
+
 }
