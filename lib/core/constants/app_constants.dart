@@ -19,4 +19,10 @@ class AppConstants {
   static String tutorielsByFormation(int formationId) =>
       '$baseUrl/medias/formations/$formationId/tutoriels';
   static const Duration splashDuration = Duration(seconds: 2);
+
+  static String getUserImageUrl(String path) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return '$baseUrlImg/$path?$timestamp';
+  }
+
 }

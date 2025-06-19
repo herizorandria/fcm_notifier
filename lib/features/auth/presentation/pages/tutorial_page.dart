@@ -20,7 +20,7 @@ class _TutorialPageState extends State<TutorialPage> {
   late final MediaRepository _mediaRepository;
   late final AuthRepository _authRepository;
 
-  late Future<List<FormationWithMedias>> _formationsFuture;
+  Future<List<FormationWithMedias>>? _formationsFuture;
 
   int? _selectedFormationId;
   String _selectedCategory = 'tutoriel';
@@ -41,7 +41,6 @@ class _TutorialPageState extends State<TutorialPage> {
       ),
       storage: storage,
     );
-    _formationsFuture = Future.value([]);
 
     _loadFormations();
   }
@@ -49,8 +48,7 @@ class _TutorialPageState extends State<TutorialPage> {
   Future<void> _loadFormations() async {
     try {
       final user = await _authRepository.getMe();
-      debugPrint("🙋 Utilisateur récupéré dans TutorialPage : $user");
-      debugPrint("🧾 Stagiaire ID : ${user.stagiaire?.id}");
+      debugPrint("Utilisateur récupéré : $user");
 
       final stagiaireId = user.stagiaire?.id;
 
@@ -59,19 +57,18 @@ class _TutorialPageState extends State<TutorialPage> {
           _formationsFuture = _mediaRepository.getFormationsAvecMedias(stagiaireId);
         });
       } else {
-        debugPrint("Aucun stagiaire lié à l'utilisateur.");
+        debugPrint("Aucun stagiaire lié");
         setState(() {
-          _formationsFuture = Future.value([]);
+          _formationsFuture = Future.value([]); // Vide seulement si pas de stagiaire
         });
       }
     } catch (e) {
-      debugPrint("Erreur lors de la récupération du stagiaire : $e");
+      debugPrint("Erreur : $e");
       setState(() {
-        _formationsFuture = Future.value([]);
+        _formationsFuture = Future.error(e); // Ou Future.value([]) selon votre besoin
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -88,15 +85,27 @@ class _TutorialPageState extends State<TutorialPage> {
       body: FutureBuilder<List<FormationWithMedias>>(
         future: _formationsFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          // État initial - pas encore chargé
+          if (_formationsFuture == null) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Erreur : ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Aucune formation trouvée."));
           }
 
-          final formations = snapshot.data!;
+          // En cours de chargement
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Erreur
+          if (snapshot.hasError) {
+            return Center(child: Text("Erreur : ${snapshot.error}"));
+          }
+
+          // Données chargées
+          final formations = snapshot.data ?? [];
+
+          if (formations.isEmpty) {
+            return const Center(child: Text("Aucune formation trouvée ny ino."));
+          }
 
           final selectedFormation = formations.firstWhere(
                 (f) => f.id == _selectedFormationId,

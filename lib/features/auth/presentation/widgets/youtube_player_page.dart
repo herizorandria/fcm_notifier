@@ -108,8 +108,48 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                 },
               ),
             ),
-          ),
 
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  currentVideo.titre,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                if (currentVideo.description != null)
+                  Text(
+                    currentVideo.description!,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.8),
+                    ),
+                  ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(Icons.category, size: 18, color: colorScheme.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      "Catégorie: ${currentVideo.categorie}",
+                      style: textTheme.bodySmall,
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(Icons.timer_outlined, size: 18, color: colorScheme.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      "Durée: ${currentVideo.duree ?? 'N/A'} min",
+                      style: textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           // Section vidéos connexes
           Expanded(
             child: Padding(

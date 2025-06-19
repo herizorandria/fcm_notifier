@@ -6,4 +6,8 @@ class RouteConstants {
   static const String userPoints = '/user-points';
   static const String notifications = '/notifications';
   static const String classement = '/classement';
+  static const String myStatistics = '/mesStatistics';
+  static const String myProgress = '/mesProgressions';
+  static const String myResults = '/mesResultats';
+  static const String myTrainings = '/mesFormations';
 }
