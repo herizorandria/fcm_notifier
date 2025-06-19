@@ -45,6 +45,9 @@ dependencies:
   get_it: ^8.0.3
   lucide_icons: ^0.257.0
   share_plus: ^7.0.0
+  flutter_inappwebview: ^6.0.0-beta.23
+  youtube_player_flutter: ^9.1.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

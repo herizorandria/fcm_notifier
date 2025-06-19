@@ -37,7 +37,20 @@ class _RankingPageState extends State<RankingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Statistiques et Classement')),
+      appBar: AppBar(
+        title: const Text(
+          'Statistiques',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        centerTitle: true,
+      ),
+
       body: SingleChildScrollView(
         child: Column(
           children: [

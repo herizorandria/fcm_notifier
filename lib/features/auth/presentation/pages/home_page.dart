@@ -66,13 +66,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFF6F4F3),
+        backgroundColor: Color(0xFFFFFFFF),
         title: const Text('Bienvenue sur Wizi Learn',
           style: TextStyle(
               color: Colors.brown,
               fontSize: 30,
               fontWeight: FontWeight.bold),
         ),
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

@@ -13,5 +13,10 @@ class AppConstants {
   static const String quizHistory = "/quiz/history";
   static const String globalRanking = '/quiz/classement/global';
   static const String quizStats = '/quiz/stats';
+  static String astucesByFormation(int formationId) =>
+      '$baseUrl/medias/formations/$formationId/astuces';
+
+  static String tutorielsByFormation(int formationId) =>
+      '$baseUrl/medias/formations/$formationId/tutoriels';
   static const Duration splashDuration = Duration(seconds: 2);
 }

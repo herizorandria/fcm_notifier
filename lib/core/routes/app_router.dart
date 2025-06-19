@@ -20,15 +20,15 @@ class AppRouter {
       case RouteConstants.dashboard:
         return MaterialPageRoute(builder: (_) => const DashboardPage());
 
-    // Nouvelle route pour le parrainage
+    // route pour le parrainage
       case RouteConstants.sponsorship:
         return MaterialPageRoute(builder: (_) => const SponsorshipPage());
 
-    // Nouvelle route pour les points utilisateur
+    // route pour les points utilisateur
       case RouteConstants.userPoints:
         return MaterialPageRoute(builder: (_) => const UserPointsPage());
 
-    // Nouvelle route pour les notifications
+    // route pour les notifications
       case RouteConstants.notifications:
         return MaterialPageRoute(builder: (_) => const NotificationsPage());
 
