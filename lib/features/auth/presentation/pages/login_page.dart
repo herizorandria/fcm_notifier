@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                           height: 50,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amber,
+                                backgroundColor: const Color(0xFFB07661),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             child: const Text(
                               'Se connecter',
-                              style: TextStyle(fontSize: 18,color: Colors.black),
+                              style: TextStyle(fontSize: 18,color: Colors.white),
                             ),
                           ),
                         );
@@ -150,8 +150,16 @@ class _LoginPageState extends State<LoginPage> {
           BlocListener<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is AuthError) {
+                final isUnauthorized = state.message.contains('401');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                  SnackBar(
+                    content: Text(
+                      isUnauthorized
+                          ? 'Vérifiez vos identifiants'
+                          : state.message,
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               } else if (state is Authenticated) {
                 ScaffoldMessenger.of(context).showSnackBar(

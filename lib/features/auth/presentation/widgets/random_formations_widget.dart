@@ -25,10 +25,11 @@ class RandomFormationsWidget extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Formations recommandées',
               style: TextStyle(
                 fontSize: 18,
+                color: const Color(0xFFB07661),
                 fontWeight: FontWeight.bold,
               ),
             ),
