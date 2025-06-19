@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             child: const Text(
                               'Se connecter',
-                              style: TextStyle(fontSize: 18,color: Colors.white),
+                              style: TextStyle(fontSize: 17,color: Colors.white),
                             ),
                           ),
                         );
@@ -165,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text("Connexion réussie"),
-                    backgroundColor: Colors.green,
+                    backgroundColor: Color(0xFFFEB823),
                   ),
                 );
                 Future.microtask(() {
