@@ -12,7 +12,7 @@ class ContactRepository {
 
     final data = response.data;
     List<Contact> contacts = [];
-
+  
     // Vérifie bien que c'est une liste
     final commerciaux = data['commerciaux'];
     final formateurs = data['formateurs'];
