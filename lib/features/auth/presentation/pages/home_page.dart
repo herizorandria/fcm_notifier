@@ -65,16 +65,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFFFFFFF),
-        title: const Text('Bienvenue sur Wizi Learn',
-          style: TextStyle(
-              color: Colors.brown,
-              fontSize: 30,
-              fontWeight: FontWeight.bold),
-        ),
+        backgroundColor: Colors.white,
         centerTitle: true,
+        title: FittedBox(
+          child: Text(
+            'Bienvenue sur Wizi Learn',
+            style: TextStyle(
+              color: Colors.brown,
+              fontSize: screenWidth < 350 ? 22 : 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -99,14 +105,16 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16.0),
               sliver: SliverToBoxAdapter(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Mes contacts',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: const Color(0xFFB07661),
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'Mes contacts',
+                        style: TextStyle(
+                          fontSize: screenWidth < 350 ? 16 : 18,
+                          color: const Color(0xFFB07661),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     TextButton(
@@ -114,7 +122,8 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ContactPage(contacts: _contacts),
+                            builder: (context) =>
+                                ContactPage(contacts: _contacts),
                           ),
                         );
                       },
@@ -124,23 +133,32 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+
+            // Contacts ou message si vide
             if (_contacts.isEmpty)
               SliverFillRemaining(
-                child: const Center(child: Text('Aucun contact disponible')),
+                child: const Center(
+                    child: Text('Aucun contact disponible')),
               )
             else
               (() {
-                final wantedRoles = ['commercial', 'formateur', 'pole_relation_client'];
+                final wantedRoles = [
+                  'commercial',
+                  'formateur',
+                  'pole_relation_client'
+                ];
                 final filteredContacts = <String, Contact>{};
                 for (final c in _contacts) {
-                  if (wantedRoles.contains(c.role) && !filteredContacts.containsKey(c.role)) {
+                  if (wantedRoles.contains(c.role) &&
+                      !filteredContacts.containsKey(c.role)) {
                     filteredContacts[c.role] = c;
                   }
                 }
                 final contactsToShow = filteredContacts.values.toList();
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => ContactCard(contact: contactsToShow[index]),
+                        (context, index) => ContactCard(
+                        contact: contactsToShow[index]),
                     childCount: contactsToShow.length,
                   ),
                 );

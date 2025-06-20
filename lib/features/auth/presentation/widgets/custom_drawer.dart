@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wizi_learn/core/constants/app_constants.dart';
@@ -19,10 +20,15 @@ class CustomDrawer extends StatelessWidget {
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is Authenticated) {
+                print('Stagiaire: ${state.user.stagiaire}');
                 return Container(
                   color: const Color(0xFFFEB823),
                   padding: const EdgeInsets.only(
-                      top: 40, left: 16, right: 16, bottom: 16),
+                    top: 40,
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -34,7 +40,9 @@ class CustomDrawer extends StatelessWidget {
                             radius: 30,
                             backgroundColor: Colors.white,
                             backgroundImage: state.user.image != null
-                                ? NetworkImage(AppConstants.getUserImageUrl(state.user.image!))
+                                ? CachedNetworkImageProvider(
+                              AppConstants.getUserImageUrl(state.user.image!),
+                            )
                                 : null,
                             child: state.user.image == null
                                 ? Text(
@@ -103,13 +111,13 @@ class CustomDrawer extends StatelessWidget {
                               _buildInfoRow(
                                 icon: Icons.location_on,
                                 text:
-                                '${state.user.stagiaire!.adresse}, ${state.user.stagiaire!.codePostal} ${state.user.stagiaire!.ville}',
+                                    '${state.user.stagiaire!.adresse}, ${state.user.stagiaire!.codePostal} ${state.user.stagiaire!.ville}',
                               ),
                               const SizedBox(height: 8),
                               _buildInfoRow(
                                 icon: Icons.calendar_today,
                                 text:
-                                'Formation depuis: ${state.user.stagiaire!.dateDebutFormation}',
+                                    'Formation depuis: ${state.user.stagiaire!.dateDebutFormation}',
                               ),
                             ],
                           ),
@@ -143,7 +151,9 @@ class CustomDrawer extends StatelessWidget {
                   label: 'Mes formations',
                   onTap: () {
                     Navigator.pushReplacementNamed(
-                        context, RouteConstants.myTrainings);
+                      context,
+                      RouteConstants.myTrainings,
+                    );
                   },
                 ),
                 _buildDrawerItem(
@@ -151,7 +161,9 @@ class CustomDrawer extends StatelessWidget {
                   label: 'Mes Statistiques',
                   onTap: () {
                     Navigator.pushReplacementNamed(
-                        context, RouteConstants.myStatistics);
+                      context,
+                      RouteConstants.myStatistics,
+                    );
                   },
                 ),
                 _buildDrawerItem(
@@ -159,7 +171,9 @@ class CustomDrawer extends StatelessWidget {
                   label: 'Mes Progrès',
                   onTap: () {
                     Navigator.pushReplacementNamed(
-                        context, RouteConstants.myProgress);
+                      context,
+                      RouteConstants.myProgress,
+                    );
                   },
                 ),
                 _buildDrawerItem(
@@ -167,7 +181,9 @@ class CustomDrawer extends StatelessWidget {
                   label: 'Mes Résultats',
                   onTap: () {
                     Navigator.pushReplacementNamed(
-                        context, RouteConstants.myResults);
+                      context,
+                      RouteConstants.myResults,
+                    );
                   },
                 ),
               ],
@@ -178,9 +194,7 @@ class CustomDrawer extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Colors.grey, width: 0.5),
-              ),
+              border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
             ),
             child: _buildDrawerItem(
               icon: Icons.logout,
@@ -207,10 +221,7 @@ class CustomDrawer extends StatelessWidget {
       leading: Icon(icon, color: iconColor),
       title: Text(
         label,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
       onTap: onTap,
     );
@@ -224,15 +235,10 @@ class CustomDrawer extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
         ),
       ],
     );
   }
-
 }
-

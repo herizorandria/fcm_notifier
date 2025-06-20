@@ -16,22 +16,26 @@ class RandomFormationsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (formations.isEmpty) {
-      return const SizedBox();
-    }
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    if (formations.isEmpty) return const SizedBox();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Titre + bouton refresh
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Formations recommandées',
-              style: TextStyle(
-                fontSize: 18,
-                color: const Color(0xFFB07661),
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                'Formations recommandées',
+                style: TextStyle(
+                  fontSize: screenWidth < 350 ? 16 : 18,
+                  color: const Color(0xFFB07661),
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (onRefresh != null)
@@ -42,35 +46,33 @@ class RandomFormationsWidget extends StatelessWidget {
               ),
           ],
         ),
+
         const SizedBox(height: 12),
+
         SizedBox(
-          height: 220,
+          height: 240, // légèrement augmenté pour éviter l'écrasement
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: formations.length,
-            itemBuilder: (context, index) {
-              // Passez le context ici
-              return _buildFormationCard(context, formations[index]);
-            },
+            itemBuilder: (context, index) =>
+                _buildFormationCard(context, formations[index], screenWidth),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFormationCard(BuildContext context, Formation formation) {
+  Widget _buildFormationCard(BuildContext context, Formation formation, double screenWidth) {
     final categoryColor = _getCategoryColor(formation.category.categorie);
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      width: 180,
+      width: screenWidth * 0.45, // responsif selon largeur écran
       margin: const EdgeInsets.symmetric(horizontal: 8),
       child: Card(
         elevation: 2,
         color: Colors.yellow.shade50,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: () {
@@ -85,152 +87,110 @@ class RandomFormationsWidget extends StatelessWidget {
           },
           child: Padding(
             padding: const EdgeInsets.all(12),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 200, // Hauteur minimale garantie
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min, // Important pour éviter l'overflow
-                children: [
-                  // Header avec image et catégorie
-                  Stack(
-                    children: [
-                      Container(
-                        height: 80,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: categoryColor.withOpacity(0.1),
-                          image: formation.imageUrl != null
-                              ? DecorationImage(
-                            image: NetworkImage(
-                              '${AppConstants.baseUrlImg}/${formation.imageUrl}',
-                            ),
-                            fit: BoxFit.cover,
-                          )
-                              : null,
-                        ),
-                        child: formation.imageUrl == null
-                            ? Icon(
-                          Icons.school,
-                          color: categoryColor,
-                          size: 30,
-                        )
-                            : null,
-                      ),
-                      Positioned(
-                        top: 6,
-                        left: 6,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: categoryColor,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            formation.category.categorie,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                    ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image de formation
+                Container(
+                  height: 80,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: categoryColor.withOpacity(0.1),
+                    image: formation.imageUrl != null
+                        ? DecorationImage(
+                      image: NetworkImage('${AppConstants.baseUrlImg}/${formation.imageUrl}'),
+                      fit: BoxFit.cover,
+                    )
+                        : null,
                   ),
+                  child: formation.imageUrl == null
+                      ? Center(
+                    child: Icon(Icons.school, color: categoryColor, size: 30),
+                  )
+                      : null,
+                ),
 
-                  const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
-                  // Titre avec contrainte de hauteur
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: 40,
-                      maxHeight: 50, // Hauteur maximale pour 2 lignes
+                // Catégorie
+                Text(
+                  formation.category.categorie,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Titre
+                Text(
+                  formation.titre.toUpperCase(),
+                  style: textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Durée et prix
+                Row(
+                  children: [
+                    Icon(Icons.schedule, size: 14, color: Colors.grey.shade600),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${formation.duree} H',
+                      style: textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
                     ),
-                    child: Text(
-                      formation.titre.toUpperCase(),
+                    const Spacer(),
+                    Text(
+                      '${formation.tarif.toInt()} €',
                       style: textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Métriques (durée + prix)
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.schedule,
-                        size: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${formation.duree} H',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${formation.tarif.toInt()} €',
-                        style: textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Bouton PDF si disponible - avec espace conditionnel
-                  if (formation.cursusPdf != null) ...[
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 32, // Hauteur fixe pour le bouton
-                      width: double.infinity,
-                      child: TextButton.icon(
-                        icon: Icon(
-                          Icons.picture_as_pdf,
-                          size: 14,
-                          color: categoryColor,
-                        ),
-                        label: Text(
-                          'Programme Pdf',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: categoryColor,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                            side: BorderSide(color: categoryColor, width: 0.5),
-                          ),
-                        ),
-                        onPressed: () async {
-                          final pdfUrl = '${AppConstants.baseUrlImg}/${formation.cursusPdf}';
-                          if (await canLaunch(pdfUrl)) {
-                            await launch(pdfUrl);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Impossible d\'ouvrir le PDF.')),
-                            );
-                          }
-                        },
+                        color: Colors.amber.shade700,
                       ),
                     ),
                   ],
+                ),
+
+                // Bouton PDF
+                if (formation.cursusPdf != null) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 32,
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      icon: Icon(Icons.picture_as_pdf, size: 14, color: categoryColor),
+                      label: Text(
+                        'Programme Pdf',
+                        style: textTheme.labelSmall?.copyWith(color: categoryColor),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          side: BorderSide(color: categoryColor, width: 0.5),
+                        ),
+                      ),
+                      onPressed: () async {
+                        final pdfUrl = '${AppConstants.baseUrlImg}/${formation.cursusPdf}';
+                        if (await canLaunch(pdfUrl)) {
+                          await launch(pdfUrl);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Impossible d'ouvrir le PDF.")),
+                          );
+                        }
+                      },
+                    ),
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
