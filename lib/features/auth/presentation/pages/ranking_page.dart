@@ -18,9 +18,9 @@ class RankingPage extends StatefulWidget {
 
 class _RankingPageState extends State<RankingPage> {
   late final StatsRepository _repository;
-  late Future<List<QuizHistory>> _historyFuture;
-  late Future<List<GlobalRanking>> _rankingFuture;
-  late Future<QuizStats> _statsFuture;
+  Future<List<QuizHistory>>? _historyFuture;
+  Future<List<GlobalRanking>>? _rankingFuture;
+  Future<QuizStats>? _statsFuture;
   bool _isLoading = true;
   bool _hasError = false;
   String? _errorMessage;
@@ -40,14 +40,20 @@ class _RankingPageState extends State<RankingPage> {
     setState(() {
       _isLoading = true;
       _hasError = false;
+      _errorMessage = null;
     });
 
     try {
-      // Lance toutes les requêtes en parallèle
+      // Réinitialiser les futures avant de les relancer
+      _historyFuture = _repository.getQuizHistory();
+      _rankingFuture = _repository.getGlobalRanking();
+      _statsFuture = _repository.getQuizStats();
+
+      // Attendre que toutes les requêtes soient terminées
       await Future.wait([
-        _historyFuture = _repository.getQuizHistory(),
-        _rankingFuture = _repository.getGlobalRanking(),
-        _statsFuture = _repository.getQuizStats(),
+        _historyFuture!,
+        _rankingFuture!,
+        _statsFuture!,
       ]);
     } catch (e) {
       setState(() {
@@ -97,18 +103,36 @@ class _RankingPageState extends State<RankingPage> {
             FutureBuilder<QuizStats>(
               future: _statsFuture,
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return const Text('Erreur de chargement des statistiques');
+                }
                 return QuizStatsWidget(stats: snapshot.data!);
               },
             ),
             FutureBuilder<List<GlobalRanking>>(
               future: _rankingFuture,
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return const Text('Erreur de chargement du classement');
+                }
                 return GlobalRankingWidget(rankings: snapshot.data!);
               },
             ),
             FutureBuilder<List<QuizHistory>>(
               future: _historyFuture,
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return const Text('Erreur de chargement de l\'historique');
+                }
                 return QuizHistoryWidget(history: snapshot.data!);
               },
             ),
@@ -118,7 +142,6 @@ class _RankingPageState extends State<RankingPage> {
     );
   }
 }
-
 class _RankingAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _RankingAppBar();
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wizi_learn/features/auth/data/models/stagiaire_model.dart';
 class Formation {
   final int id;
   final String titre;
@@ -11,6 +12,8 @@ class Formation {
   final int statut;
   final String duree;
   final FormationCategory category;
+  final List<StagiaireModel>? stagiaires;
+
   // Models
   Formation({
     required this.id,
@@ -24,6 +27,7 @@ class Formation {
     required this.statut,
     required this.duree,
     required this.category,
+    required this.stagiaires
   });
 
   factory Formation.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,9 @@ class Formation {
       statut: json['statut'],
       duree: json['duree'],
       category: FormationCategory.fromJson(json['formation']),
+      stagiaires: json['stagiaires'] != null
+          ? (json['stagiaires'] as List).map((s) => StagiaireModel.fromJson(s)).toList()
+          : null,
     );
   }
 }

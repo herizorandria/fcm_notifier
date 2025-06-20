@@ -89,17 +89,18 @@ class _HomePageState extends State<HomePage> {
         child: CustomScrollView(
           slivers: [
             // Section Formations
-            if (_randomFormations.isNotEmpty)
-              SliverToBoxAdapter(
+            SliverPadding(
+              padding: const EdgeInsets.only(top: 16, bottom: 8),
+              sliver: SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: RandomFormationsWidget(
                     formations: _randomFormations,
                     onRefresh: _refreshData,
                   ),
                 ),
               ),
-
+            ),
             // Section Contacts
             SliverPadding(
               padding: const EdgeInsets.all(16.0),
