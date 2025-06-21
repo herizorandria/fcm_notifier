@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/random_formations_widget.dart';
-import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
 
 void main() {
   testWidgets('RandomFormationsWidget se construit sans erreur', (

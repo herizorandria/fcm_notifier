@@ -32,7 +32,7 @@ class QuizStatsWidget extends StatelessWidget {
               const SizedBox(height: 24),
               _buildSectionHeader('📚 Statistiques par Catégorie'),
               const SizedBox(height: 8),
-              ...stats.categoryStats.map((category) => _buildCategoryStat(category)).toList(),
+              ...stats.categoryStats.map((category) => _buildCategoryStat(category)),
               const SizedBox(height: 24),
               _buildSectionHeader('🎯 Progression par Niveau'),
               const SizedBox(height: 8),

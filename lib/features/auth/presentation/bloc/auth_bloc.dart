@@ -43,7 +43,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await authRepository.logout();
       emit(Unauthenticated());
-    } on AuthException catch (e) {
+    } on AuthException {
       // Même en cas d'erreur, on considère l'utilisateur comme déconnecté
       emit(Unauthenticated());
     } catch (e) {
