@@ -19,11 +19,16 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 360;
+    final width = MediaQuery.of(context).size.width;
+    final isSmallScreen = width < 360;
+    final iconSize = isSmallScreen ? 20.0 : 24.0;
+    final labelFontSize = isSmallScreen ? 11.0 : 13.0;
+    final navBarHeight = isSmallScreen ? 60.0 : 80.0;
+    final fabSize = isSmallScreen ? 48.0 : 65.0;
+    final fabIconSize = isSmallScreen ? 22.0 : 30.0;
 
     return Container(
-      height: 80,
+      height: navBarHeight,
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: const BorderRadius.only(
@@ -47,8 +52,15 @@ class CustomBottomNavBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(LucideIcons.home, "Accueil", 0, isSmallScreen),
-              _buildNavItem(LucideIcons.bookOpen, "Formation", 1, isSmallScreen),
-              SizedBox(width: isSmallScreen ? 50 : 60), // Espace pour l'icône centrale
+              _buildNavItem(
+                LucideIcons.bookOpen,
+                "Formation",
+                1,
+                isSmallScreen,
+              ),
+              SizedBox(
+                width: isSmallScreen ? 50 : 60,
+              ), // Espace pour l'icône centrale
               _buildNavItem(LucideIcons.trophy, "Classement", 3, isSmallScreen),
               _buildNavItem(LucideIcons.video, "Tutoriel", 4, isSmallScreen),
             ],
@@ -89,7 +101,12 @@ class CustomBottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index, bool isSmallScreen) {
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    int index,
+    bool isSmallScreen,
+  ) {
     final isActive = index == currentIndex;
 
     return GestureDetector(
@@ -103,7 +120,8 @@ class CustomBottomNavBar extends StatelessWidget {
           vertical: isSmallScreen ? 6 : 8,
         ),
         decoration: BoxDecoration(
-          color: isActive ? selectedColor.withOpacity(0.15) : Colors.transparent,
+          color:
+              isActive ? selectedColor.withOpacity(0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -114,7 +132,7 @@ class CustomBottomNavBar extends StatelessWidget {
               color: isActive ? selectedColor : unselectedColor,
               size: isSmallScreen ? 22 : 24,
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: isSmallScreen ? 2 : 4),
             Text(
               label,
               style: TextStyle(
