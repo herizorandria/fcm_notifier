@@ -25,6 +25,12 @@ class Contact extends Equatable {
   });
 
   factory Contact.fromJson(Map<String, dynamic> json) {
+  final userJson = {
+    'user': json['user'] ?? {},
+    if (json.containsKey('user') && (json['user'] as Map).containsKey('stagiaire'))
+      'stagiaire': json['user']['stagiaire'],
+  };
+
     return Contact(
       id: json['id'],
       prenom: json['prenom'],
@@ -34,9 +40,10 @@ class Contact extends Equatable {
       deletedAt: json['deleted_at'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
-      user: UserModel.fromJson(json['user']),
+    user: UserModel.fromJson(userJson),
     );
   }
+
 
   @override
   List<Object?> get props => [

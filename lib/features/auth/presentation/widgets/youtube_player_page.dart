@@ -100,7 +100,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                 progressColors: ProgressBarColors(
                   playedColor: colorScheme.primary,
                   handleColor: colorScheme.primary,
-                  bufferedColor: colorScheme.surfaceVariant,
+                  bufferedColor: colorScheme.surfaceContainerHighest,
                   backgroundColor: colorScheme.onSurface.withOpacity(0.2),
                 ),
                 onReady: () {

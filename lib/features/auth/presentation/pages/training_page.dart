@@ -255,7 +255,7 @@ class _TrainingPageState extends State<TrainingPage> {
                               ),
                             ),
                             title: Text(
-                              formation.titre,
+                              formation.titre.toUpperCase(),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -279,7 +279,7 @@ class _TrainingPageState extends State<TrainingPage> {
                                     Text('${formation.duree}h', style: const TextStyle(fontSize: 14)),
                                     const Spacer(),
                                     Text(
-                                      '${formatPrice(formation.tarif)} €',
+                                      '${formatPrice(formation.tarif.toInt())} €',
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
