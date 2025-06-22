@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/core/constants/route_constants.dart';
+import 'package:wizi_learn/features/auth/presentation/constants/couleur_palette.dart';
 import 'custom_app_bar.dart';
 import 'custom_drawer.dart';
 import 'custom_bottom_navbar.dart';
@@ -63,7 +64,7 @@ class CustomScaffold extends StatelessWidget {
                 margin: const EdgeInsets.all(12),
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary, // Utilisation de la couleur primaire
+                  color: AppColors.primaryAccent, // Utilisation de la couleur primaire
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -78,12 +79,42 @@ class CustomScaffold extends StatelessWidget {
                     Icon(Icons.card_giftcard, size: 30, color: theme.colorScheme.onPrimary),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        'Parraine et gagne 50€ !',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: theme.colorScheme.onPrimary,
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                          children: [
+                            const TextSpan(text: 'Parraine et gagne '),
+                            WidgetSpan(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '50€',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.black,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black.withOpacity(0.3),
+                                        blurRadius: 2,
+                                        offset: const Offset(1, 1),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const TextSpan(text: ' !'),
+                          ],
                         ),
                       ),
                     ),

@@ -29,7 +29,7 @@ class RandomFormationsWidget extends StatelessWidget {
 
         // Liste horizontale des formations
         SizedBox(
-          height: cardWidth * 1.4, // Hauteur proportionnelle à la largeur
+          height: cardWidth * 1.5, // Augmentation de la hauteur pour les boutons
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -89,14 +89,14 @@ class _FormationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryColor = _getCategoryColor(formation.category.categorie);
     final textTheme = Theme.of(context).textTheme;
-    final imageHeight = cardWidth * 0.6;
+    final imageHeight = cardWidth * 0.55;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 6),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),  // Bordures légèrement réduites
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -109,20 +109,18 @@ class _FormationCard extends StatelessWidget {
 
               // Contenu texte
               Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
                 child: SizedBox(
-                  width: cardWidth - 20, // Largeur fixe déduisant le padding
+                  width: cardWidth - 20,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Badge catégorie
                       _buildCategoryBadge(categoryColor, textTheme),
-
-                      const SizedBox(height: 6),
-
+                      const SizedBox(height: 4),
                       // Titre avec hauteur fixe
                       SizedBox(
-                        height: 30, // Hauteur fixe pour 2 lignes
+                        height: 30,
                         child: Text(
                           formation.titre,
                           style: textTheme.bodyMedium?.copyWith(
@@ -134,14 +132,15 @@ class _FormationCard extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
 
                       // Durée et prix
                       _buildDurationAndPrice(textTheme),
 
-                      // Bouton PDF si disponible
-                      if (formation.cursusPdf != null)
-                        _buildPdfButton(context, categoryColor, textTheme),
+                      const SizedBox(height: 6),
+
+                      // Boutons en ligne
+                      _buildActionButtons(context, categoryColor, textTheme),
                     ],
                   ),
                 ),
@@ -162,7 +161,8 @@ class _FormationCard extends StatelessWidget {
         color: categoryColor.withOpacity(0.1),
         image: formation.imageUrl != null
             ? DecorationImage(
-          image: CachedNetworkImageProvider('${AppConstants.baseUrlImg}/${formation.imageUrl}'),
+          image: CachedNetworkImageProvider(
+              '${AppConstants.baseUrlImg}/${formation.imageUrl}'),
           fit: BoxFit.cover,
         )
             : null,
@@ -219,23 +219,68 @@ class _FormationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPdfButton(BuildContext context, Color color, TextTheme textTheme) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: SizedBox(
-        height: 28,
-        width: double.infinity,
-        child: OutlinedButton.icon(
-          icon: Icon(Icons.picture_as_pdf, size: 14, color: color),
-          label: Text('PDF', style: textTheme.labelSmall?.copyWith(color: color)),
-          style: OutlinedButton.styleFrom(
-            padding: EdgeInsets.zero,
-            side: BorderSide(color: color),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
+  Widget _buildActionButtons(BuildContext context, Color color, TextTheme textTheme) {
+    return Row(
+      children: [
+        // Bouton PDF si disponible
+        if (formation.cursusPdf != null)
+          Expanded(
+            child: _buildPdfButton(context, color, textTheme),
+          ),
+
+        if (formation.cursusPdf != null) const SizedBox(width: 8),
+
+        // Bouton S'inscrire
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => _registerToFormation(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: color,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              'S\'inscrire',
+              style: textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
-          onPressed: () => _openPdf(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPdfButton(BuildContext context, Color color, TextTheme textTheme) {
+    return SizedBox(
+      height: 32,
+      child: OutlinedButton(
+        onPressed: () => _openPdf(context),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: color),
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.picture_as_pdf, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              'PDF',
+              style: textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -246,6 +291,16 @@ class _FormationCard extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => FormationDetailPage(formationId: formation.id),
+      ),
+    );
+  }
+
+  void _registerToFormation(BuildContext context) {
+    // TODO: Implémenter la logique d'inscription
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Inscription à ${formation.titre}'),
+        backgroundColor: Colors.green,
       ),
     );
   }
