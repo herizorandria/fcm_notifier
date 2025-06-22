@@ -25,5 +25,7 @@ class AppConstants {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '$baseUrlImg/$path?$timestamp';
   }
+  static const String quizProgress = '/quiz/stats/progress';
+
 
 }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:wizi_learn/features/auth/presentation/constants/bar_clipper.dart';
+
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -19,61 +23,58 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final isSmallScreen = width < 360;
-    final iconSize = isSmallScreen ? 20.0 : 24.0;
-    final labelFontSize = isSmallScreen ? 11.0 : 13.0;
-    final navBarHeight = isSmallScreen ? 60.0 : 80.0;
-    final fabSize = isSmallScreen ? 48.0 : 65.0;
-    final fabIconSize = isSmallScreen ? 22.0 : 30.0;
+    final mediaQuery = MediaQuery.of(context);
+    final isVerySmallScreen = mediaQuery.size.width < 340;
+    final isSmallScreen = mediaQuery.size.width < 400;
+    final safeAreaBottom = mediaQuery.padding.bottom;
 
-    return Container(
+    final navBarHeight = isVerySmallScreen
+        ? 60.0 + safeAreaBottom
+        : isSmallScreen
+        ? 70.0 + safeAreaBottom
+        : 80.0 + safeAreaBottom;
+
+    final iconSize = isVerySmallScreen ? 20.0 : isSmallScreen ? 22.0 : 24.0;
+    final labelFontSize = isVerySmallScreen ? 9.0 : isSmallScreen ? 11.0 : 12.0;
+    final fabSize = isVerySmallScreen ? 50.0 : isSmallScreen ? 60.0 : 70.0;
+    final fabIconSize = isVerySmallScreen ? 24.0 : isSmallScreen ? 28.0 : 32.0;
+    final itemPadding = isVerySmallScreen ? 4.0 : isSmallScreen ? 6.0 : 8.0;
+
+    return SizedBox(
       height: navBarHeight,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 10 : 20),
       child: Stack(
-        alignment: Alignment.center,
+        clipBehavior: Clip.none,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(LucideIcons.home, "Accueil", 0, isSmallScreen),
-              _buildNavItem(
-                LucideIcons.bookOpen,
-                "Formation",
-                1,
-                isSmallScreen,
+          // Fond avec encoche au centre
+          ClipPath(
+            clipper: BottomNavBarClipper(),
+            child: Container(
+              height: navBarHeight,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 20,
+                    spreadRadius: 0,
+                    offset: Offset(0, -5),
+                  ),
+                ],
               ),
-              SizedBox(
-                width: isSmallScreen ? 50 : 60,
-              ), // Espace pour l'icône centrale
-              _buildNavItem(LucideIcons.trophy, "Classement", 3, isSmallScreen),
-              _buildNavItem(LucideIcons.video, "Tutoriel", 4, isSmallScreen),
-            ],
+            ),
           ),
+
+          // Bouton central flottant
           Positioned(
-            bottom: 15,
+            left: mediaQuery.size.width / 2 - fabSize / 2,
+            top: -fabSize * 0.35,
             child: GestureDetector(
               onTap: () => onTap(2),
               child: Container(
-                height: isSmallScreen ? 55 : 65,
-                width: isSmallScreen ? 55 : 65,
+                height: fabSize,
+                width: fabSize,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [Color(0xFFFFA800), Color(0xFFFFD700)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -81,19 +82,83 @@ class CustomBottomNavBar extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: selectedColor.withOpacity(0.4),
+                      color: selectedColor.withOpacity(0.3),
                       blurRadius: 15,
                       spreadRadius: 2,
-                      offset: const Offset(0, 5),
+                      offset: Offset(0, 5),
                     ),
                   ],
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 3,
+                  ),
                 ),
                 child: Icon(
-                  LucideIcons.helpCircle,
-                  size: isSmallScreen ? 26 : 30,
+                  LucideIcons.ampersand,
+                  size: fabIconSize,
                   color: Colors.white,
                 ),
               ),
+            ),
+          ),
+
+          // Contenu de la barre (icônes)
+          Padding(
+            padding: EdgeInsets.only(
+              left: 12,
+              right: 12,
+              top: 8,
+              bottom: 8 + safeAreaBottom,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildNavItem(
+                  context,
+                  icon: LucideIcons.home,
+                  label: "Accueil",
+                  index: 0,
+                  isVerySmallScreen: isVerySmallScreen,
+                  isSmallScreen: isSmallScreen,
+                  iconSize: iconSize,
+                  fontSize: labelFontSize,
+                  padding: itemPadding,
+                ),
+                _buildNavItem(
+                  context,
+                  icon: LucideIcons.bookOpen,
+                  label: "Formation",
+                  index: 1,
+                  isVerySmallScreen: isVerySmallScreen,
+                  isSmallScreen: isSmallScreen,
+                  iconSize: iconSize,
+                  fontSize: labelFontSize,
+                  padding: itemPadding,
+                ),
+                SizedBox(width: fabSize * 0.7), // Espace central
+                _buildNavItem(
+                  context,
+                  icon: LucideIcons.trophy,
+                  label: "Classement",
+                  index: 3,
+                  isVerySmallScreen: isVerySmallScreen,
+                  isSmallScreen: isSmallScreen,
+                  iconSize: iconSize,
+                  fontSize: labelFontSize,
+                  padding: itemPadding,
+                ),
+                _buildNavItem(
+                  context,
+                  icon: LucideIcons.video,
+                  label: "Tutoriel",
+                  index: 4,
+                  isVerySmallScreen: isVerySmallScreen,
+                  isSmallScreen: isSmallScreen,
+                  iconSize: iconSize,
+                  fontSize: labelFontSize,
+                  padding: itemPadding,
+                ),
+              ],
             ),
           ),
         ],
@@ -102,46 +167,49 @@ class CustomBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem(
-    IconData icon,
-    String label,
-    int index,
-    bool isSmallScreen,
-  ) {
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required int index,
+        required bool isVerySmallScreen,
+        required bool isSmallScreen,
+        required double iconSize,
+        required double fontSize,
+        required double padding,
+      }) {
     final isActive = index == currentIndex;
+    final theme = Theme.of(context);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => onTap(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 8 : 12,
-          vertical: isSmallScreen ? 6 : 8,
-        ),
-        decoration: BoxDecoration(
-          color:
-              isActive ? selectedColor.withOpacity(0.15) : Colors.transparent,
+    return Flexible(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
           borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isActive ? selectedColor : unselectedColor,
-              size: isSmallScreen ? 22 : 24,
+          onTap: () => onTap(index),
+          child: Container(
+            padding: EdgeInsets.all(padding),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: iconSize,
+                  color: isActive ? selectedColor : unselectedColor,
+                ),
+                SizedBox(height: isVerySmallScreen ? 2 : 4),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: fontSize,
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                    color: isActive ? selectedColor : unselectedColor,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: isSmallScreen ? 2 : 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isActive ? selectedColor : unselectedColor,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                fontSize: isSmallScreen ? 11 : 13,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

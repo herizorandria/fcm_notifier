@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/dashboard_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/formation_stagiaire_page.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/my_progression.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/notifications_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/ranking_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/sponsor_ship_page.dart';
@@ -35,7 +36,12 @@ class AppRouter {
 
       case RouteConstants.classement:
         return MaterialPageRoute(builder: (_) => const RankingPage());
-      case RouteConstants.myTrainings: return MaterialPageRoute(builder:(_)=> const FormationStagiairePage());
+      case RouteConstants.myTrainings:
+        return MaterialPageRoute(
+          builder: (_) => const FormationStagiairePage(),
+        );
+      case RouteConstants.myProgress:
+        return MaterialPageRoute(builder: (_) => const ProgressPage());
       default:
         return MaterialPageRoute(
           builder:
