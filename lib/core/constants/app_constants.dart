@@ -14,6 +14,7 @@ class AppConstants {
   static const String quizHistory = "/quiz/history";
   static const String globalRanking = '/quiz/classement/global';
   static const String quizStats = '/quiz/stats';
+
   static String astucesByFormation(int formationId) =>
       '$baseUrl/medias/formations/$formationId/astuces';
 
@@ -22,10 +23,11 @@ class AppConstants {
   static const Duration splashDuration = Duration(seconds: 2);
 
   static String getUserImageUrl(String path) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final timestamp = DateTime
+        .now()
+        .millisecondsSinceEpoch;
     return '$baseUrlImg/$path?$timestamp';
   }
+
   static const String quizProgress = '/quiz/stats/progress';
-
-
 }

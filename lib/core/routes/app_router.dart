@@ -42,6 +42,8 @@ class AppRouter {
         );
       case RouteConstants.myProgress:
         return MaterialPageRoute(builder: (_) => const ProgressPage());
+
+
       default:
         return MaterialPageRoute(
           builder:
