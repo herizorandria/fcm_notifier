@@ -36,24 +36,18 @@ class _OrderingQuestionState extends State<OrderingQuestion> {
     return correctOrder[index].id == answer.id;
   }
 
-  void _onReorder(Key key, int newPosition) {
+  void _onReorder(int oldIndex, int newIndex) {
     if (widget.showFeedback) return;
 
     setState(() {
-      final oldPosition = _orderedAnswers.indexWhere(
-        (a) => ValueKey(a.id) == key,
-      );
-
-      if (oldPosition != newPosition) {
-        if (oldPosition < newPosition) {
-          newPosition -= 1;
-        }
-
-        final answer = _orderedAnswers.removeAt(oldPosition);
-        _orderedAnswers.insert(newPosition, answer);
-
-        widget.onAnswer(_orderedAnswers.map((a) => a.id.toString()).toList());
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
       }
+      final answer = _orderedAnswers.removeAt(oldIndex);
+      _orderedAnswers.insert(newIndex, answer);
+
+      // Envoyer la liste des IDs dans l'ordre
+      widget.onAnswer(_orderedAnswers.map((a) => a.id.toString()).toList());
     });
   }
 

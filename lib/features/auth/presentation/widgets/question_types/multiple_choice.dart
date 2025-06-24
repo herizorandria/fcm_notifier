@@ -3,15 +3,13 @@ import 'package:wizi_learn/features/auth/data/models/question_model.dart';
 
 class MultipleChoiceQuestion extends StatefulWidget {
   final Question question;
-  final Function(List<String>) onAnswer;
-  final bool showFeedback;
+  final Function(dynamic) onAnswer;
   final VoidCallback? onNext;
 
   const MultipleChoiceQuestion({
     super.key,
     required this.question,
     required this.onAnswer,
-    required this.showFeedback,
     this.onNext,
   });
 
@@ -21,174 +19,120 @@ class MultipleChoiceQuestion extends StatefulWidget {
 
 class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
   late List<String> _selectedAnswers;
-  bool _isMultipleCorrect = false;
-  bool _isSubmitting = false;
+  late bool _isMultipleCorrect;
 
   @override
   void initState() {
     super.initState();
     _selectedAnswers = [];
-    _isMultipleCorrect =
-        widget.question.answers.where((a) => a.correct == true).length > 1;
 
+    // Compter les réponses correctes
+    final correctAnswersCount = widget.question.answers
+        .where((a) => a.correct)
+        .length;
+    _isMultipleCorrect = correctAnswersCount > 1;
+
+    // Initialiser avec les réponses existantes si disponibles
     if (widget.question.selectedAnswers != null) {
-      _selectedAnswers = widget.question.selectedAnswers!.keys.toList();
+      if (widget.question.selectedAnswers is List) {
+        _selectedAnswers =
+        List<String>.from(widget.question.selectedAnswers as List);
+      } else if (widget.question.selectedAnswers is String) {
+        _selectedAnswers = [widget.question.selectedAnswers as String];
+      }
     }
   }
 
-  Future<void> _handleAnswerSelect(String answerId) async {
-    if (widget.showFeedback || _isSubmitting) return;
-
+  void _handleAnswerSelect(String answerId) {
     setState(() {
       if (_isMultipleCorrect) {
+        // Pour choix multiple: toggle la sélection
         if (_selectedAnswers.contains(answerId)) {
           _selectedAnswers.remove(answerId);
         } else {
           _selectedAnswers.add(answerId);
         }
       } else {
+        // Pour choix unique: remplace la sélection
         _selectedAnswers = [answerId];
+        _submitAnswer();
       }
     });
-
-    // Attendre que l'interface soit mise à jour
-    await Future.delayed(const Duration(milliseconds: 200));
-
-    if (!_isMultipleCorrect) {
-      setState(() => _isSubmitting = true);
-      final selectedTexts = _selectedAnswers.map((id) {
-        return widget.question.answers
-            .firstWhere((a) => a.id.toString() == id)
-            .text;
-      }).toList();
-
-      widget.onAnswer(selectedTexts);
-
-      // Optionnel: navigation automatique après réponse
-      if (widget.onNext != null) {
-        await Future.delayed(const Duration(milliseconds: 500));
-        widget.onNext!();
-      }
-    }
   }
 
-  bool _isCorrectAnswer(String answerId) {
-    return widget.question.answers
-        .firstWhere((a) => a.id.toString() == answerId)
-        .correct;
+  void _submitAnswer() {
+    if (_selectedAnswers.isEmpty) return;
+
+    final response = _isMultipleCorrect
+        ? _selectedAnswers.map((id) {
+      final answer = widget.question.answers
+          .firstWhere((a) => a.id.toString() == id);
+      return {'id': answer.id.toString(), 'text': answer.text};
+    }).toList()
+        : {
+      'id': _selectedAnswers.first,
+      'text': widget.question.answers
+          .firstWhere((a) => a.id.toString() == _selectedAnswers.first)
+          .text,
+    };
+
+    widget.onAnswer(response);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
         ...widget.question.answers.map((answer) {
-          final answerId = answer.id.toString();
-          final isSelected = _selectedAnswers.contains(answerId);
-          final isCorrect = _isCorrectAnswer(answerId);
+          final isSelected = _selectedAnswers.contains(answer.id.toString());
 
-          return AbsorbPointer(
-            absorbing: widget.showFeedback || _isSubmitting,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(bottom: 8),
+          return InkWell(
+            onTap: () => _handleAnswerSelect(answer.id.toString()),
+            child: Container(
+              margin: EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isSelected
-                      ? widget.showFeedback
-                      ? isCorrect
-                      ? Colors.green
-                      : Colors.red
-                      : Theme.of(context).colorScheme.primary
-                      : widget.showFeedback && isCorrect
-                      ? Colors.green
-                      : Colors.grey[300]!,
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey,
                 ),
+                borderRadius: BorderRadius.circular(8),
                 color: isSelected
-                    ? widget.showFeedback
-                    ? isCorrect
-                    ? Colors.green[50]
-                    : Colors.red[50]
-                    : Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withOpacity(0.1)
-                    : widget.showFeedback && isCorrect
-                    ? Colors.green[50]
+                    ? Theme.of(context).primaryColor.withOpacity(0.1)
                     : null,
               ),
-              child: CheckboxListTile(
-                value: isSelected,
-                onChanged: (value) => _handleAnswerSelect(answerId),
-                title: Text(
-                  answer.text,
-                  style: TextStyle(
-                    color: isSelected
-                        ? widget.showFeedback
-                        ? isCorrect
-                        ? Colors.green[800]
-                        : Colors.red[800]
-                        : null
-                        : widget.showFeedback && isCorrect
-                        ? Colors.green[800]
+              child: Row(
+                children: [
+                  _isMultipleCorrect
+                      ? Checkbox(
+                    value: isSelected,
+                    onChanged: (_) =>
+                        _handleAnswerSelect(answer.id.toString()),
+                  )
+                      : Radio(
+                    value: answer.id.toString(),
+                    groupValue: _selectedAnswers.isNotEmpty
+                        ? _selectedAnswers.first
                         : null,
+                    onChanged: (value) =>
+                        _handleAnswerSelect(value.toString()),
                   ),
-                ),
-                controlAffinity: ListTileControlAffinity.leading,
-                secondary: widget.showFeedback
-                    ? Icon(
-                  isCorrect ? Icons.check : Icons.close,
-                  color: isCorrect ? Colors.green : Colors.red,
-                )
-                    : null,
+                  SizedBox(width: 12),
+                  Expanded(child: Text(answer.text)),
+                ],
               ),
             ),
           );
         }).toList(),
-
-        if (!_isMultipleCorrect && _selectedAnswers.isNotEmpty && !widget.showFeedback)
+        if (_isMultipleCorrect && _selectedAnswers.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 16.0),
+            padding: EdgeInsets.only(top: 16),
             child: ElevatedButton(
-              onPressed: () {
-                final selectedTexts = _selectedAnswers.map((id) {
-                  return widget.question.answers
-                      .firstWhere((a) => a.id.toString() == id)
-                      .text;
-                }).toList();
-
-                widget.onAnswer(selectedTexts);
-                widget.onNext?.call();
-              },
-              child: const Text('Confirmer'),
+              onPressed: _submitAnswer,
+              child: Text('Confirmer'),
             ),
           ),
-
-        if (widget.showFeedback) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: _selectedAnswers.every(_isCorrectAnswer)
-                  ? Colors.green[50]
-                  : Colors.red[50],
-            ),
-            child: Text(
-              _selectedAnswers.every(_isCorrectAnswer)
-                  ? "Bonne réponse !"
-                  : "Réponse incorrecte. Les bonnes réponses étaient: ${widget.question.answers.where((a) => a.correct == true).map((a) => a.text).join(", ")}",
-              style: TextStyle(
-                color: _selectedAnswers.every(_isCorrectAnswer)
-                    ? Colors.green[800]
-                    : Colors.red[800],
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }

@@ -93,7 +93,9 @@ class _FillBlankQuestionState extends State<FillBlankQuestion> {
     setState(() {
       _answers[blankId] = value;
     });
-    widget.onAnswer({..._answers, 'questionType': widget.question.type});
+
+    // Envoyer toutes les réponses sous forme de map
+    widget.onAnswer(_answers);
   }
 
   Widget _buildInputField(String blankId) {

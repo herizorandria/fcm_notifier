@@ -48,6 +48,7 @@ class _MatchingQuestionState extends State<MatchingQuestion> {
       _matches[leftId] = rightValue;
     });
 
+    // Envoyer les paires de correspondances
     widget.onAnswer(_matches);
   }
 

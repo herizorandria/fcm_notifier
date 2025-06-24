@@ -28,7 +28,9 @@ class _TrueFalseQuestionState extends State<TrueFalseQuestion> {
     // Initialiser avec les réponses sélectionnées existantes
     if (widget.question.selectedAnswers != null) {
       if (widget.question.selectedAnswers is List) {
-        _selectedAnswers = List<String>.from(widget.question.selectedAnswers as Iterable);
+        _selectedAnswers = List<String>.from(
+          widget.question.selectedAnswers as Iterable,
+        );
       } else if (widget.question.selectedAnswers is String) {
         _selectedAnswers = [widget.question.selectedAnswers as String];
       }
@@ -39,17 +41,17 @@ class _TrueFalseQuestionState extends State<TrueFalseQuestion> {
     if (widget.showFeedback) return;
 
     setState(() {
-      // Pour Vrai/Faux, on ne permet qu'une seule sélection
       _selectedAnswers = [answerId];
-
-      final selectedAnswer = widget.question.answers.firstWhere(
-        (a) => a.id.toString() == answerId,
-      );
-
-      widget.onAnswer([
-        {'id': answerId, 'text': selectedAnswer.text},
-      ]);
     });
+
+    final selected = widget.question.answers.firstWhere(
+      (a) => a.id.toString() == answerId,
+    );
+
+    // Envoyer le texte de la réponse (ex: "Vrai" ou "Faux")
+    widget.onAnswer([
+      {'id': selected.id, 'text': selected.text},
+    ]);
   }
 
   bool _isCorrectAnswer(String answerId) {

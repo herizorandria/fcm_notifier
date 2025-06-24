@@ -59,6 +59,18 @@ class Question {
 
 
 
+    // Conversion des bonnes réponses
+    List<dynamic>? correctAnswers;
+    if (json['correctAnswers'] != null) {
+      if (json['correctAnswers'] is List) {
+        correctAnswers = json['correctAnswers'] as List;
+      } else if (json['correctAnswers'] is String) {
+        correctAnswers = [json['correctAnswers']];
+      }
+    }
+
+
+
     // Conversion des blanks
     final blanks = json['blanks'] is List
         ? (json['blanks'] as List).map((b) => Blank.fromJson(b)).toList()
@@ -343,6 +355,40 @@ class QuestionMeta {
       hasHint: json['has_hint'] as bool?,
       showSolution: json['show_solution'] as bool?,
       attemptsAllowed: json['attempts_allowed'] as int?,
+    );
+  }
+}
+
+class QuizSubmissionResponse {
+  final int id;
+  final int quizId;
+  final int score;
+  final int correctAnswers;
+  final int totalQuestions;
+  final int timeSpent;
+  final List<Question> questions;
+
+  QuizSubmissionResponse({
+    required this.id,
+    required this.quizId,
+    required this.score,
+    required this.correctAnswers,
+    required this.totalQuestions,
+    required this.timeSpent,
+    required this.questions,
+  });
+
+  factory QuizSubmissionResponse.fromJson(Map<String, dynamic> json) {
+    return QuizSubmissionResponse(
+      id: json['id'] as int,
+      quizId: json['quizId'] as int,
+      score: json['score'] as int,
+      correctAnswers: json['correctAnswers'] as int,
+      totalQuestions: json['totalQuestions'] as int,
+      timeSpent: json['timeSpent'] as int,
+      questions: (json['questions'] as List)
+          .map((q) => Question.fromJson(q as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

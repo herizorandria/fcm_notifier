@@ -89,7 +89,6 @@ class QuestionTypePage extends StatelessWidget {
         return MultipleChoiceQuestion(
           question: question,
           onAnswer: (answers) => onAnswer(answers),
-          showFeedback: showFeedback,
           onNext: onNext,
         );
       case "vrai/faux":

@@ -92,4 +92,25 @@ class QuizRepository {
       return [];
     }
   }
+
+  Future<Map<String, dynamic>> submitQuizResults({
+    required int quizId,
+    required Map<String, dynamic> answers,
+    required int timeSpent,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        '/quiz/$quizId/result',
+        data: {
+          'answers': answers,
+          'timeSpent': timeSpent,
+        },
+      );
+
+      return response.data ?? {};
+    } catch (e, stack) {
+      debugPrint('Error submitting quiz results: $e\n$stack');
+      throw Exception('Failed to submit quiz results');
+    }
+  }
 }

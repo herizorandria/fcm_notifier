@@ -34,35 +34,22 @@ class _WordBankState extends State<WordBankQuestion> {
     if (widget.showFeedback) return;
 
     setState(() {
-      List<String> newSelectedWords;
-
       if (_selectedWords.contains(wordId)) {
-        // Retirer le mot s'il est déjà sélectionné
-        newSelectedWords = _selectedWords.where((id) => id != wordId).toList();
+        _selectedWords.remove(wordId);
       } else {
-        // Ajouter le mot s'il n'est pas déjà sélectionné
-        newSelectedWords = [..._selectedWords, wordId];
+        _selectedWords.add(wordId);
       }
-
-      _selectedWords = newSelectedWords;
-
-      // Envoyer seulement le texte des mots sélectionnés
-      final selectedTexts =
-          newSelectedWords.map((id) {
-            return widget.question.answers != null
-                ? widget.question.answers!
-                    .firstWhere(
-                      (a) => a.id == id,
-                      orElse: () => Answer(text: '', id: '',correct: false),
-                    )
-                    .text
-                : '';
-          }).toList();
-
-      widget.onAnswer(selectedTexts);
     });
-  }
 
+    // Envoyer les textes des mots sélectionnés
+    final selectedTexts = _selectedWords.map((id) {
+      return widget.question.answers!
+          .firstWhere((a) => a.id == id)
+          .text;
+    }).toList();
+
+    widget.onAnswer(selectedTexts);
+  }
   bool? _isWordCorrect(String wordId) {
     if (!widget.showFeedback) return null;
 
