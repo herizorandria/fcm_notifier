@@ -46,7 +46,7 @@ class FormationRepository {
   Future<List<Formation>> getCatalogueFormations({int? stagiaireId}) async {
     try {
       final response = await apiClient.get(AppConstants.formationStagiaire);
-      debugPrint('getCatalogueFormations: ${response.data}');
+      // debugPrint('getCatalogueFormations: ${response.data}');
 
       final data = response.data;
 
@@ -99,6 +99,17 @@ class FormationRepository {
     } catch (e) {
       debugPrint('Erreur getCatalogueFormations: $e');
       rethrow;
+    }
+  }
+
+  Future<void> inscrireAFormation(int formationId) async {
+    // À adapter selon l'endpoint réel de votre API
+    final response = await apiClient.post('/stagiaire/inscription', data: {
+      'formation_id': formationId,
+    });
+    // Vous pouvez traiter la réponse ici si besoin
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Erreur lors de l\'inscription');
     }
   }
 }

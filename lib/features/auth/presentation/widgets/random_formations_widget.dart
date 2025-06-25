@@ -4,6 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:wizi_learn/core/constants/app_constants.dart';
 import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/detail_formation_page.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:wizi_learn/core/network/api_client.dart';
+import 'package:wizi_learn/features/auth/data/repositories/formation_repository.dart';
 
 class RandomFormationsWidget extends StatelessWidget {
   final List<Formation> formations;
@@ -19,11 +23,10 @@ class RandomFormationsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 350;
-    final cardWidth = isSmallScreen
-      ? 180.0
-      : (screenWidth < 450
-        ? 200.0
-        : screenWidth / 2.75);
+    final cardWidth =
+        isSmallScreen
+            ? 180.0
+            : (screenWidth < 450 ? 200.0 : screenWidth / 2.75);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,22 +36,28 @@ class RandomFormationsWidget extends StatelessWidget {
 
         // Liste horizontale des formations
         SizedBox(
-            height: screenWidth < 768 ? cardWidth * 1.3 : (screenWidth < 1024 ? cardWidth * 1 :cardWidth*0.95), // Hauteur ajustée pour petits écrans
+          height:
+              screenWidth < 768
+                  ? cardWidth * 1.3
+                  : (screenWidth < 1024
+                      ? cardWidth * 1
+                      : cardWidth * 0.95), // Hauteur ajustée pour petits écrans
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: formations.length,
-            itemBuilder: (context, index) => ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: cardWidth,
-                maxWidth: cardWidth,
-              ),
-              child: _FormationCard(
-                formation: formations[index],
-                cardWidth: cardWidth,
-                isSmallScreen: isSmallScreen, // Pass down
-              ),
-            ),
+            itemBuilder:
+                (context, index) => ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: cardWidth,
+                    maxWidth: cardWidth,
+                  ),
+                  child: _FormationCard(
+                    formation: formations[index],
+                    cardWidth: cardWidth,
+                    isSmallScreen: isSmallScreen, // Pass down
+                  ),
+                ),
           ),
         ),
       ],
@@ -81,7 +90,7 @@ class RandomFormationsWidget extends StatelessWidget {
   }
 }
 
-class _FormationCard extends StatelessWidget {
+class _FormationCard extends StatefulWidget {
   final Formation formation;
   final double cardWidth;
   final bool isSmallScreen;
@@ -93,43 +102,58 @@ class _FormationCard extends StatelessWidget {
   });
 
   @override
+  State<_FormationCard> createState() => _FormationCardState();
+}
+
+class _FormationCardState extends State<_FormationCard> {
+  late final FormationRepository _repository;
+  bool _isLoading = false;
+  bool _success = false;
+  bool _error = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final apiClient = ApiClient(
+      dio: Dio(),
+      storage: const FlutterSecureStorage(),
+    );
+    _repository = FormationRepository(apiClient: apiClient);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final categoryColor = _getCategoryColor(formation.category.categorie);
+    final categoryColor = _getCategoryColor(
+      widget.formation.category.categorie,
+    );
     final textTheme = Theme.of(context).textTheme;
-    final imageHeight = cardWidth * 0.55;
+    final imageHeight = widget.cardWidth * 0.55;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 6),
       child: Card(
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),  // Bordures légèrement réduites
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () => _navigateToDetail(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image avec placeholder
               _buildImageSection(imageHeight, categoryColor),
-
-              // Contenu texte
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
                 child: SizedBox(
-                  width: cardWidth - 20,
+                  width: widget.cardWidth - 20,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Badge catégorie
                       _buildCategoryBadge(categoryColor, textTheme),
                       const SizedBox(height: 4),
-                      // Titre avec hauteur fixe
                       SizedBox(
                         height: 30,
                         child: Text(
-                          formation.titre.toUpperCase(),
+                          widget.formation.titre.toUpperCase(),
                           style: textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             height: 1.2,
@@ -138,15 +162,9 @@ class _FormationCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-
                       const SizedBox(height: 6),
-
-                      // Durée et prix
                       _buildDurationAndPrice(textTheme),
-
                       const SizedBox(height: 6),
-
-                      // Boutons en ligne
                       _buildActionButtons(context, categoryColor, textTheme),
                     ],
                   ),
@@ -166,23 +184,22 @@ class _FormationCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         color: categoryColor.withOpacity(0.1),
-        image: formation.imageUrl != null
-            ? DecorationImage(
-          image: CachedNetworkImageProvider(
-              '${AppConstants.baseUrlImg}/${formation.imageUrl}'),
-          fit: BoxFit.cover,
-        )
-            : null,
+        image:
+            widget.formation.imageUrl != null
+                ? DecorationImage(
+                  image: CachedNetworkImageProvider(
+                    '${AppConstants.baseUrlImg}/${widget.formation.imageUrl}',
+                  ),
+                  fit: BoxFit.cover,
+                )
+                : null,
       ),
-      child: formation.imageUrl == null
-          ? Center(
-        child: Icon(
-          Icons.school,
-          color: categoryColor,
-          size: 36,
-        ),
-      )
-          : null,
+      child:
+          widget.formation.imageUrl == null
+              ? Center(
+                child: Icon(Icons.school, color: categoryColor, size: 36),
+              )
+              : null,
     );
   }
 
@@ -194,7 +211,7 @@ class _FormationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        formation.category.categorie,
+        widget.formation.category.categorie,
         style: textTheme.labelSmall?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.bold,
@@ -211,12 +228,12 @@ class _FormationCard extends StatelessWidget {
         Icon(Icons.schedule, size: 14, color: Colors.grey.shade600),
         const SizedBox(width: 4),
         Text(
-          '${formation.duree} H',
+          '${widget.formation.duree} H',
           style: textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
         ),
         const Spacer(),
         Text(
-          '${formation.tarif.toInt()} €',
+          '${widget.formation.tarif.toInt()} €',
           style: textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.amber.shade800,
@@ -226,48 +243,66 @@ class _FormationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, Color color, TextTheme textTheme) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    Color color,
+    TextTheme textTheme,
+  ) {
     return Row(
       children: [
-        // Bouton PDF si disponible
-        if (formation.cursusPdf != null)
-          Expanded(
-            child: _buildPdfButton(context, color, textTheme),
-          ),
-
-        if (formation.cursusPdf != null) const SizedBox(width: 8),
-
-        // Bouton S'inscrire
+        if (widget.formation.cursusPdf != null)
+          Expanded(child: _buildPdfButton(context, color, textTheme)),
+        if (widget.formation.cursusPdf != null) const SizedBox(width: 8),
         Expanded(
           child: ElevatedButton(
-            onPressed: () => _registerToFormation(context),
+            onPressed: _isLoading ? null : () => _registerToFormation(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
               foregroundColor: Colors.white,
-              padding: isSmallScreen
-                  ? const EdgeInsets.symmetric(vertical: 2, horizontal: 0)
-                  : const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
-              minimumSize: isSmallScreen ? const Size(0, 28) : const Size(0, 36),
+              padding:
+                  widget.isSmallScreen
+                      ? const EdgeInsets.symmetric(vertical: 2, horizontal: 0)
+                      : const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+              minimumSize:
+                  widget.isSmallScreen ? const Size(0, 28) : const Size(0, 36),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
               elevation: 0,
             ),
-            child: Text(
-              'S\'inscrire',
-              style: textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: isSmallScreen ? 10 : null,
-              ),
-            ),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                    : Text(
+                      _success
+                          ? "Inscription réussie !"
+                          : _error
+                          ? "Erreur, réessayer"
+                          : "S'inscrire",
+                      style: textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: widget.isSmallScreen ? 10 : null,
+                      ),
+                    ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPdfButton(BuildContext context, Color color, TextTheme textTheme) {
+  Widget _buildPdfButton(
+    BuildContext context,
+    Color color,
+    TextTheme textTheme,
+  ) {
     return SizedBox(
       height: 32,
       child: OutlinedButton(
@@ -275,9 +310,7 @@ class _FormationCard extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: color),
           padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -301,23 +334,44 @@ class _FormationCard extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FormationDetailPage(formationId: formation.id),
+        builder:
+            (context) => FormationDetailPage(formationId: widget.formation.id),
       ),
     );
   }
 
-  void _registerToFormation(BuildContext context) {
-    // TODO: Implémenter la logique d'inscription
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Inscription à ${formation.titre}'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  Future<void> _registerToFormation(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+      _success = false;
+      _error = false;
+    });
+    try {
+      await _repository.inscrireAFormation(widget.formation.id);
+      setState(() {
+        _success = true;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Inscription réussie !')));
+    } catch (e) {
+      setState(() {
+        _error = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur lors de l\'inscription. Veuillez réessayer.'),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _openPdf(BuildContext context) async {
-    final pdfUrl = '${AppConstants.baseUrlImg}/${formation.cursusPdf}';
+    final pdfUrl = '${AppConstants.baseUrlImg}/${widget.formation.cursusPdf}';
     try {
       if (await canLaunch(pdfUrl)) {
         await launch(pdfUrl);
@@ -325,19 +379,24 @@ class _FormationCard extends StatelessWidget {
         throw 'Impossible d\'ouvrir le PDF';
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
   Color _getCategoryColor(String category) {
     switch (category) {
-      case 'Bureautique': return const Color(0xFF3D9BE9);
-      case 'Langues': return const Color(0xFFA55E6E);
-      case 'Internet': return const Color(0xFFFFC533);
-      case 'Création': return const Color(0xFF9392BE);
-      default: return Colors.grey;
+      case 'Bureautique':
+        return const Color(0xFF3D9BE9);
+      case 'Langues':
+        return const Color(0xFFA55E6E);
+      case 'Internet':
+        return const Color(0xFFFFC533);
+      case 'Création':
+        return const Color(0xFF9392BE);
+      default:
+        return Colors.grey;
     }
   }
 }

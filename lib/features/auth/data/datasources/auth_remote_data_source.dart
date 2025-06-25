@@ -84,7 +84,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> getMe() async {
     try {
       final response = await apiClient.get(AppConstants.meEndpoint);
-      debugPrint('Réponse getMe : ${response.data}');
+      // debugPrint('Réponse getMe : ${response.data}');
 
       return UserModel.fromJson(response.data);
     } on DioException catch (e) {
