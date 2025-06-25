@@ -3,6 +3,7 @@ import 'package:wizi_learn/core/constants/app_constants.dart';
 import 'package:wizi_learn/core/network/api_client.dart';
 import 'package:wizi_learn/features/auth/data/models/question_model.dart';
 import 'package:wizi_learn/features/auth/data/models/quiz_model.dart';
+import 'dart:convert';
 
 class QuizRepository {
   final ApiClient apiClient;
@@ -76,7 +77,8 @@ class QuizRepository {
   Future<List<Question>> getQuizQuestions(int quizId) async {
     try {
       final response = await apiClient.get('/quiz/$quizId/questions');
-      debugPrint('Reponse Quiz: ${response.data}');
+      final formattedJson = const JsonEncoder.withIndent('  ').convert(response.data);
+      debugPrint('Questions:\n$formattedJson');
 
       if (response.data == null || response.data['data'] == null) return [];
 

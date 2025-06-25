@@ -13,16 +13,17 @@ class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
 
   @override
-  State<QuizPage> createState() => _QuizPage();
+  State<QuizPage> createState() => _QuizPageState();
 }
 
-class _QuizPage extends State<QuizPage> {
+class _QuizPageState extends State<QuizPage> {
   late final QuizRepository _quizRepository;
   late final AuthRepository _authRepository;
-  Future<List<Quiz>> _futureQuizzes = Future.value([]);
+  Future<List<Quiz>>? _futureQuizzes;
   final Map<int, bool> _expandedQuizzes = {};
   final ScrollController _scrollController = ScrollController();
   bool _showBackToTopButton = false;
+  bool _isInitialLoad = true;
 
   @override
   void initState() {
@@ -70,30 +71,36 @@ class _QuizPage extends State<QuizPage> {
   }
 
   Future<void> _loadQuizzesForConnectedStagiaire() async {
+    setState(() => _isInitialLoad = true);
     try {
       final user = await _authRepository.getMe();
-      debugPrint('User info: ${user}'); // Ajouté pour le debug
       final connectedStagiaireId = user.stagiaire?.id;
 
       if (connectedStagiaireId == null) {
-        debugPrint('Aucun ID de stagiaire trouvé');
-        setState(() => _futureQuizzes = Future.value([]));
+        setState(() {
+          _futureQuizzes = Future.value([]);
+          _isInitialLoad = false;
+        });
         return;
       }
 
       final quizzes = await _quizRepository.getQuizzesForStagiaire(
         stagiaireId: connectedStagiaireId,
       );
-      debugPrint(
-        'Nombre de quiz chargés: ${quizzes.length}',
-      ); // Ajouté pour le debug
 
       setState(() {
         _futureQuizzes = Future.value(quizzes);
+        _isInitialLoad = false;
+        for (var quiz in quizzes) {
+          _expandedQuizzes.putIfAbsent(quiz.id, () => false);
+        }
       });
     } catch (e) {
       debugPrint('Erreur chargement quiz: $e');
-      setState(() => _futureQuizzes = Future.value([]));
+      setState(() {
+        _futureQuizzes = Future.value([]);
+        _isInitialLoad = false;
+      });
     }
   }
 
@@ -119,7 +126,10 @@ class _QuizPage extends State<QuizPage> {
         elevation: 1,
         foregroundColor: isDarkMode ? Colors.white : Colors.black87,
       ),
-      body: _buildBody(theme),
+      body:
+          _isInitialLoad
+              ? _buildLoadingScreen(theme)
+              : _buildMainContent(theme),
       floatingActionButton:
           _showBackToTopButton
               ? FloatingActionButton(
@@ -135,80 +145,243 @@ class _QuizPage extends State<QuizPage> {
     );
   }
 
-  Widget _buildBody(ThemeData theme) {
+  Widget _buildLoadingScreen(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: theme.colorScheme.primary),
+          const SizedBox(height: 20),
+          Text('Chargement de vos quiz...', style: theme.textTheme.bodyLarge),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent(ThemeData theme) {
     return RefreshIndicator(
       onRefresh: _loadQuizzesForConnectedStagiaire,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    'Vos quiz disponibles',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Testez vos connaissances avec ces quiz',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverToBoxAdapter(child: _buildHeader(theme)),
+          _buildQuizListContent(theme),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Text(
+            'Vos quiz disponibles',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Testez vos connaissances avec ces quiz',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuizListContent(ThemeData theme) {
+    if (_futureQuizzes == null) {
+      return SliverFillRemaining(child: _buildEmptyState(theme));
+    }
+
+    return FutureBuilder<List<Quiz>>(
+      future: _futureQuizzes,
+      builder: (context, snapshot) {
+        // Pendant le refresh (mais après le premier chargement)
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !_isInitialLoad) {
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _buildQuizShimmer(theme),
+              childCount: 3,
+            ),
+          );
+        }
+
+        // Erreur
+        if (snapshot.hasError) {
+          return SliverFillRemaining(child: _buildErrorState(theme));
+        }
+
+        // Données disponibles
+        if (snapshot.hasData) {
+          final quizzes = snapshot.data!;
+          if (quizzes.isNotEmpty) {
+            return SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _buildQuizCard(
+                  quizzes[index],
+                  _expandedQuizzes[quizzes[index].id] ?? false,
+                  theme,
+                ),
+                childCount: quizzes.length,
               ),
-            ),
-            FutureBuilder<List<Quiz>>(
-              future: _futureQuizzes,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return SliverFillRemaining(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: theme.colorScheme.primary,
+            );
+          }
+          return SliverFillRemaining(child: _buildEmptyState(theme));
+        }
+
+        // Cas par défaut (ne devrait normalement pas arriver)
+        return SliverFillRemaining(child: _buildLoadingScreen(theme));
+      },
+    );
+  }
+
+  Widget _buildQuizShimmer(ThemeData theme) {
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return SliverFillRemaining(child: _buildErrorState(theme));
-                }
-
-                final quizzes = snapshot.data ?? [];
-                if (quizzes.isEmpty) {
-                  return SliverFillRemaining(child: _buildEmptyState(theme));
-                }
-
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final quiz = quizzes[index];
-                    final isExpanded = _expandedQuizzes[quiz.id] ?? false;
-
-                    return _buildQuizCard(quiz, isExpanded, theme);
-                  }, childCount: quizzes.length),
-                );
-              },
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 120,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuizCard(Quiz quiz, bool isExpanded, ThemeData theme) {
-    final isDarkMode = theme.brightness == Brightness.dark;
+  Widget _buildInfoRow(IconData icon, String text, ThemeData theme) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+      ],
+    );
+  }
 
+  Widget _buildEmptyState(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.quiz_outlined,
+            size: 48,
+            color: theme.colorScheme.primary.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text('Aucun quiz disponible', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Text(
+            'Vous n\'avez actuellement aucun quiz disponible.',
+            style: theme.textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+          const SizedBox(height: 16),
+          Text(
+            'Erreur de chargement',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Nous n\'avons pas pu charger vos quiz. Veuillez réessayer.',
+            style: theme.textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _loadQuizzesForConnectedStagiaire,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Réessayer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuizCard(Quiz quiz, bool isExpanded, ThemeData theme) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -283,16 +456,28 @@ class _QuizPage extends State<QuizPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Questions',
+                  'Description',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
+                Text(
+                  quiz.description ?? 'Aucune description disponible',
+                  style: theme.textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                     onPressed: () async {
                       try {
                         final questions = await _quizRepository
@@ -300,10 +485,15 @@ class _QuizPage extends State<QuizPage> {
 
                         if (questions.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
+                            SnackBar(
+                              content: const Text(
                                 'Aucune question disponible pour ce quiz',
                               ),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: const EdgeInsets.all(20),
                             ),
                           );
                           return;
@@ -312,20 +502,23 @@ class _QuizPage extends State<QuizPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (_) => QuizSessionPage(
-                                  quiz: quiz,
-                                  questions: questions,
-                                ),
+                            builder: (_) => QuizSessionPage(
+                              quiz: quiz,
+                              questions: questions,
+                            ),
                           ),
                         );
                       } catch (e) {
-                        debugPrint(
-                          'Erreur lors du chargement des questions : $e',
-                        );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Erreur de chargement des questions'),
+                          SnackBar(
+                            content: const Text(
+                              'Erreur de chargement des questions',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            margin: const EdgeInsets.all(20),
                           ),
                         );
                       }
@@ -338,69 +531,6 @@ class _QuizPage extends State<QuizPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildErrorState(ThemeData theme) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
-        const SizedBox(height: 16),
-        Text('Erreur de chargement', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Text(
-            'Nous n\'avons pas pu charger vos quiz. Veuillez réessayer.',
-            style: theme.textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _loadQuizzesForConnectedStagiaire,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: theme.colorScheme.onPrimary,
-          ),
-          child: const Text('Réessayer'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState(ThemeData theme) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.quiz_outlined,
-          size: 48,
-          color: theme.colorScheme.primary.withOpacity(0.5),
-        ),
-        const SizedBox(height: 16),
-        Text('Aucun quiz disponible', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Text(
-            'Vous n\'avez actuellement aucun quiz disponible.',
-            style: theme.textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String text, ThemeData theme) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: theme.colorScheme.primary),
-        const SizedBox(width: 8),
-        Text(text, style: theme.textTheme.bodyMedium),
-      ],
     );
   }
 }

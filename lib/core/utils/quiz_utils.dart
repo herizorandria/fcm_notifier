@@ -3,7 +3,7 @@ import 'package:wizi_learn/features/auth/data/models/question_model.dart';
 
 class QuizUtils {
   static String normalizeString(String input) {
-    return input.toLowerCase().trim();
+    return input.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
   }
 
   static String formatCorrectAnswer(Question question) {
@@ -26,11 +26,7 @@ class QuizUtils {
           final answerTexts = question.correctAnswers!.map((id) {
             final answer = question.answers.firstWhere(
                   (a) => a.id == id,
-              orElse: () => Answer(
-                id: "-1",
-                text: id.toString(),
-                correct: false,
-              ),
+              orElse: () => Answer(id: "-1", text: id.toString(), correct: false),
             );
             return answer.text;
           }).toList();
@@ -39,62 +35,46 @@ class QuizUtils {
         return "Aucune réponse correcte définie";
 
       case "correspondance":
-        final leftItems = question.answers.where((a) => a.correct).toList();
-        final pairCount = leftItems.length;
-        final half = (pairCount / 2).floor();
-        final left = leftItems.sublist(0, half);
-        final right = leftItems.sublist(half);
-        final pairs = left.asMap().entries.map((entry) {
-          final index = entry.key;
-          final leftItem = entry.value;
-          final rightItem = right.length > index ? right[index] : null;
-          return "${leftItem.text} → ${rightItem?.text ?? "?"}";
-        }).toList();
+        final pairs = <String>[];
+        final correctAnswers = question.answers.where((a) => a.correct).toList();
+        final half = (correctAnswers.length / 2).floor();
+        final left = correctAnswers.sublist(0, half);
+        final right = correctAnswers.sublist(half);
+        for (int i = 0; i < left.length; i++) {
+          final rightText = i < right.length ? right[i].text : "?";
+          pairs.add("${left[i].text} → $rightText");
+        }
         return pairs.isNotEmpty ? pairs.join("; ") : "Aucune réponse correcte définie";
 
       case "carte flash":
-        final flashcard = question.answers.firstWhere(
+        final card = question.answers.firstWhere(
               (a) => a.correct,
           orElse: () => Answer(id: "-1", text: "Aucune réponse", correct: false),
         );
-        return flashcard.id != "-1"
-            ? "${flashcard.text}${flashcard.flashcardBack != null ? " (${flashcard.flashcardBack})" : ""}"
+        return card.id != "-1"
+            ? "${card.text}${card.flashcardBack != null ? " (${card.flashcardBack})" : ""}"
             : "Aucune réponse correcte définie";
 
       case "rearrangement":
-        final orderedAnswers = List<Answer>.from(question.answers)
+        final ordered = List<Answer>.from(question.answers)
           ..sort((a, b) => (a.position ?? 0).compareTo(b.position ?? 0));
-        return orderedAnswers.asMap().entries.map((entry) {
-          final index = entry.key;
-          final answer = entry.value;
-          return "${index + 1}. ${answer.text}";
-        }).join(", ");
+        return ordered.asMap().entries.map((e) => "${e.key + 1}. ${e.value.text}").join(", ");
 
       case "banque de mots":
-        final correctWords = question.answers.where((a) => a.correct).toList();
-        if (correctWords.isNotEmpty) {
-          return correctWords.map((a) => a.text).join(", ");
-        }
-        return "Aucune réponse correcte définie";
+        final correct = question.answers.where((a) => a.correct).map((a) => a.text).toList();
+        return correct.isNotEmpty ? correct.join(", ") : "Aucune réponse correcte définie";
 
       default:
-        final correctAnswers = question.answers.where((a) => a.correct).toList();
-        if (correctAnswers.isNotEmpty) {
-          return correctAnswers.map((a) => a.text).join(", ");
-        }
+        final correct = question.answers.where((a) => a.correct).map((a) => a.text).toList();
+        if (correct.isNotEmpty) return correct.join(", ");
         if (question.correctAnswers != null && question.correctAnswers!.isNotEmpty) {
-          final answerTexts = question.correctAnswers!.map((id) {
+          return question.correctAnswers!.map((id) {
             final answer = question.answers.firstWhere(
                   (a) => a.id == id,
-              orElse: () => Answer(
-                id: "-1",
-                text: id.toString(),
-                correct: false,
-              ),
+              orElse: () => Answer(id: "-1", text: id.toString(), correct: false),
             );
             return answer.text;
-          }).toList();
-          return answerTexts.join(", ");
+          }).join(", ");
         }
         return "Aucune réponse correcte définie";
     }
@@ -114,165 +94,112 @@ class QuizUtils {
         if (correctBlanks.isNotEmpty) {
           if (userAnswer is! Map<String, dynamic>) return false;
           return correctBlanks.entries.every((entry) {
-            final key = entry.key;
-            final correctValue = entry.value;
-            final userValue = userAnswer[key]?.toString();
-            return userValue != null &&
-                normalizeString(userValue) == normalizeString(correctValue);
+            final userVal = userAnswer[entry.key]?.toString();
+            return userVal != null &&
+                normalizeString(userVal) == normalizeString(entry.value);
           });
         } else {
-          final correctAnswers = question.answers
+          final correctTexts = question.answers
               .where((a) => a.correct)
               .map((a) => normalizeString(a.text))
               .toList();
-          List<String> userAnswers;
-          if (userAnswer is List) {
-            userAnswers = userAnswer.map((ans) => normalizeString(ans.toString())).toList();
-          } else {
-            userAnswers = [normalizeString(userAnswer.toString())];
-          }
-          return correctAnswers.length == userAnswers.length &&
-              correctAnswers.every((ca) => userAnswers.contains(ca));
+          final userTexts = (userAnswer is List)
+              ? userAnswer.map((e) => normalizeString(e.toString())).toList()
+              : [normalizeString(userAnswer.toString())];
+          return Set.from(correctTexts).containsAll(userTexts) &&
+              Set.from(userTexts).containsAll(correctTexts);
         }
 
       case "correspondance":
-        final answersById = {
-          for (var a in question.answers) a.id.toString(): a,
-        };
-        final correctPairs = question.answers.where((a) => a.correct).toList();
-        final pairCount = correctPairs.length;
-        final half = (pairCount / 2).floor();
-        final left = correctPairs.sublist(0, half);
-        final right = correctPairs.sublist(half);
-        final Map<String, String> correctAnswers = {};
-        for (var i = 0; i < left.length; i++) {
-          correctAnswers[left[i].text] = right.length > i ? right[i].text : "";
-        }
-        if (userAnswer is Map<String, dynamic>) {
-          final userAnswers = userAnswer;
-          final allCorrect = correctAnswers.entries.every((entry) {
-            final country = entry.key;
-            final capital = entry.value;
-            final countryItem = question.answers.firstWhere(
-                  (a) => a.text == country,
-              orElse: () => Answer(id: "-1", text: "", correct: false),
-            );
-            if (countryItem.id == "-1") return false;
-            final userCapital = userAnswers[countryItem.text];
-            if (userCapital == null) return false;
-            final capitalItem = question.answers.firstWhere(
-                  (a) => a.text == capital,
-              orElse: () => Answer(id: "-1", text: "", correct: false),
-            );
-            if (capitalItem.id == "-1") return false;
-            return userCapital.toString() == capitalItem.id.toString() ||
-                normalizeString(userCapital.toString()) == normalizeString(capital);
-          });
-          final userCountries = userAnswers.keys.where((country) => correctAnswers[country] != null).toList();
-          final correctCountries = correctAnswers.keys.toList();
-          final noExtraAnswers = userCountries.length == correctCountries.length &&
-              userCountries.every((country) => correctCountries.contains(country));
-          if (allCorrect && noExtraAnswers) {
-            return true;
+        final correct = <String, String>{};
+        final pairs = question.answers.where((a) => a.correct).toList();
+        final half = (pairs.length / 2).floor();
+        final left = pairs.sublist(0, half);
+        final right = pairs.sublist(half);
+        for (int i = 0; i < left.length; i++) {
+          if (i < right.length) {
+            correct[left[i].text] = right[i].text;
           }
         }
-        if (userAnswer is List) {
-          return userAnswer.every((pairStr) {
-            if (pairStr is! String || !pairStr.contains("-")) return false;
-            final parts = pairStr.split("-");
-            if (parts.length != 2) return false;
-            final leftId = parts[0];
-            final rightId = parts[1];
-            final leftItem = answersById[leftId];
-            final rightItem = answersById[rightId];
-            if (leftItem == null || rightItem == null) return false;
-            return leftItem.matchPair == rightItem.id.toString() ||
-                leftItem.matchPair == rightItem.text;
+
+        if (userAnswer is Map<String, dynamic>) {
+          final allMatch = correct.entries.every((entry) {
+            final userVal = userAnswer[entry.key]?.toString();
+            return userVal != null &&
+                normalizeString(userVal) == normalizeString(entry.value);
           });
+          return allMatch && userAnswer.length == correct.length;
         }
+
         return false;
 
       case "rearrangement":
         if (userAnswer is! List) return false;
+        final correctOrder = question.correctAnswers?.map((e) => e.toString()).toList() ??
+            question.answers
+                .where((a) => a.correct)
+                .map((a) => a.id.toString())
+                .toList();
         return const ListEquality().equals(
-          userAnswer.map((a) => a.toString()).toList(),
-          question.correctAnswers?.map((a) => a.toString()).toList() ?? [],
+          userAnswer.map((e) => e.toString()).toList(),
+          correctOrder,
         );
 
       case "carte flash":
-        final correctAnswer = question.answers.firstWhere(
+        final correct = question.answers.firstWhere(
               (a) => a.correct,
           orElse: () => Answer(id: "-1", text: "", correct: false),
         );
-        return correctAnswer.id != "-1" &&
-            (correctAnswer.text == userAnswer.toString() ||
-                correctAnswer.id.toString() == userAnswer.toString());
+        return correct.id != "-1" &&
+            (normalizeString(correct.text) == normalizeString(userAnswer.toString()) ||
+                correct.id.toString() == userAnswer.toString());
 
       case "question audio":
-        if (userAnswer is String) {
-          final answer = question.answers.firstWhere(
-                (a) => a.text == userAnswer,
-            orElse: () => Answer(id: "-1", text: "", correct: false),
-          );
-          return answer.correct;
-        } else if (userAnswer is Map<String, dynamic>) {
-          final answer = question.answers.firstWhere(
-                (a) =>
-            a.text == userAnswer['text'] ||
-                a.id.toString() == userAnswer['id'].toString(),
-            orElse: () => Answer(id: "-1", text: "", correct: false),
-          );
-          return answer.correct;
-        }
-        return false;
+        final matching = question.answers.firstWhere(
+              (a) =>
+          a.id.toString() == userAnswer.toString() ||
+              normalizeString(a.text) == normalizeString(userAnswer.toString()),
+          orElse: () => Answer(id: "-1", text: "", correct: false),
+        );
+        return matching.correct;
 
       case "banque de mots":
         if (userAnswer is! List) return false;
-        final correctAnswerTexts = question.answers
+        final correctSet = question.answers
             .where((a) => a.correct)
             .map((a) => normalizeString(a.text))
-            .toList();
-        if (correctAnswerTexts.isEmpty) return false;
-        final userAnswersNormalized =
-        userAnswer.map((answer) => normalizeString(answer.toString())).toList();
-        return correctAnswerTexts.every((correctText) => userAnswersNormalized.contains(correctText)) &&
-            userAnswersNormalized.every((userText) => correctAnswerTexts.contains(userText));
+            .toSet();
+        final userSet = userAnswer
+            .map((e) => normalizeString(e.toString()))
+            .toSet();
+        return correctSet.length == userSet.length && correctSet.containsAll(userSet);
 
       case "choix multiples":
       case "vrai/faux":
         if (userAnswer is! List) return false;
-        if (question.correctAnswers == null || question.correctAnswers!.isEmpty) {
-          return false;
-        }
-        final correctIds = question.correctAnswers!.map((id) => id.toString()).toList();
-        final userAnswers = userAnswer.map((a) => a.toString()).toList();
-        return correctIds.every((id) => userAnswers.contains(id)) &&
-            userAnswers.every((id) => correctIds.contains(id));
+
+        final correctSet = question.correctAnswers?.map((e) => e.toString()).toSet() ??
+            question.answers
+                .where((a) => a.correct)
+                .map((a) => a.id.toString())
+                .toSet();
+
+        final userSet = userAnswer.map((e) => e.toString()).toSet();
+
+        return correctSet.length == userSet.length && correctSet.containsAll(userSet);
 
       default:
-        final correctAnswerIds = question.answers
-            .where((a) => a.correct)
-            .map((a) => a.id.toString())
-            .toList();
-        if (correctAnswerIds.isEmpty) {
-          if (question.correctAnswers != null && question.correctAnswers!.isNotEmpty) {
-            final correctIds = question.correctAnswers!.map((id) => id.toString()).toList();
-            if (userAnswer is List) {
-              final normalizedUserAnswers = userAnswer.map((id) => id.toString()).toList();
-              return correctIds.length == normalizedUserAnswers.length &&
-                  correctIds.every((id) => normalizedUserAnswers.contains(id));
-            } else {
-              return correctIds.contains(userAnswer.toString());
-            }
-          }
-          return false;
-        }
+        final correctSet = question.correctAnswers?.map((e) => e.toString()).toSet() ??
+            question.answers
+                .where((a) => a.correct)
+                .map((a) => a.id.toString())
+                .toSet();
+
         if (userAnswer is List) {
-          final normalizedUserAnswers = userAnswer.map((id) => id.toString()).toList();
-          return correctAnswerIds.length == normalizedUserAnswers.length &&
-              correctAnswerIds.every((id) => normalizedUserAnswers.contains(id));
+          final userSet = userAnswer.map((e) => e.toString()).toSet();
+          return correctSet.length == userSet.length && correctSet.containsAll(userSet);
         } else {
-          return correctAnswerIds.contains(userAnswer.toString());
+          return correctSet.contains(userAnswer.toString());
         }
     }
   }

@@ -20,7 +20,7 @@ class Question {
   bool? isCorrect;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Map<String, String>? selectedAnswers;
+  dynamic selectedAnswers;
 
 
   Question({

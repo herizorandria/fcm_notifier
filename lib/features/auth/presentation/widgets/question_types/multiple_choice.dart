@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/data/models/question_model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 
 class MultipleChoiceQuestion extends StatefulWidget {
   final Question question;
@@ -19,24 +21,20 @@ class MultipleChoiceQuestion extends StatefulWidget {
 
 class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
   late List<String> _selectedAnswers;
-  late bool _isMultipleCorrect;
+  bool _answerConfirmed = false;
 
   @override
   void initState() {
     super.initState();
     _selectedAnswers = [];
-
-    // Compter les réponses correctes
-    final correctAnswersCount = widget.question.answers
-        .where((a) => a.correct)
-        .length;
-    _isMultipleCorrect = correctAnswersCount > 1;
+    _answerConfirmed = widget.question.selectedAnswers != null;
 
     // Initialiser avec les réponses existantes si disponibles
     if (widget.question.selectedAnswers != null) {
       if (widget.question.selectedAnswers is List) {
-        _selectedAnswers =
-        List<String>.from(widget.question.selectedAnswers as List);
+        _selectedAnswers = List<String>.from(
+          widget.question.selectedAnswers as List,
+        );
       } else if (widget.question.selectedAnswers is String) {
         _selectedAnswers = [widget.question.selectedAnswers as String];
       }
@@ -45,17 +43,11 @@ class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
 
   void _handleAnswerSelect(String answerId) {
     setState(() {
-      if (_isMultipleCorrect) {
-        // Pour choix multiple: toggle la sélection
-        if (_selectedAnswers.contains(answerId)) {
-          _selectedAnswers.remove(answerId);
-        } else {
-          _selectedAnswers.add(answerId);
-        }
+      // Pour choix multiple uniquement: toggle la sélection
+      if (_selectedAnswers.contains(answerId)) {
+        _selectedAnswers.remove(answerId);
       } else {
-        // Pour choix unique: remplace la sélection
-        _selectedAnswers = [answerId];
-        _submitAnswer();
+        _selectedAnswers.add(answerId);
       }
     });
   }
@@ -63,75 +55,74 @@ class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
   void _submitAnswer() {
     if (_selectedAnswers.isEmpty) return;
 
-    final response = _isMultipleCorrect
-        ? _selectedAnswers.map((id) {
-      final answer = widget.question.answers
-          .firstWhere((a) => a.id.toString() == id);
-      return {'id': answer.id.toString(), 'text': answer.text};
-    }).toList()
-        : {
-      'id': _selectedAnswers.first,
-      'text': widget.question.answers
-          .firstWhere((a) => a.id.toString() == _selectedAnswers.first)
-          .text,
-    };
+    final response =
+        _selectedAnswers.map((id) {
+          final answer = widget.question.answers.firstWhere(
+            (a) => a.id.toString() == id,
+          );
+          return {'id': answer.id.toString(), 'text': answer.text};
+        }).toList();
 
-    widget.onAnswer(response);
+    widget.onAnswer(response); // Enregistre la réponse localement
+    setState(() {
+      _answerConfirmed = true; // Marquer la réponse comme confirmée
+    });
+    // Affiche un message de confirmation
+    Fluttertoast.showToast(
+      msg: "Réponse sauvegardée avec succès !",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP, // ou CENTER, BOTTOM, etc.
+      backgroundColor: Colors.green[500],
+      textColor: Colors.white,
+      fontSize: 16.0,
+      timeInSecForIosWeb: 2,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+
+        const SizedBox(height: 20),
         ...widget.question.answers.map((answer) {
           final isSelected = _selectedAnswers.contains(answer.id.toString());
 
           return InkWell(
             onTap: () => _handleAnswerSelect(answer.id.toString()),
             child: Container(
-              margin: EdgeInsets.only(bottom: 8),
-              padding: EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey,
+                  color:
+                      isSelected ? Theme.of(context).primaryColor : Colors.grey,
                 ),
                 borderRadius: BorderRadius.circular(8),
-                color: isSelected
-                    ? Theme.of(context).primaryColor.withOpacity(0.1)
-                    : null,
+                color:
+                    isSelected
+                        ? Theme.of(context).primaryColor.withOpacity(0.1)
+                        : null,
               ),
               child: Row(
                 children: [
-                  _isMultipleCorrect
-                      ? Checkbox(
+                  Checkbox(
                     value: isSelected,
-                    onChanged: (_) =>
-                        _handleAnswerSelect(answer.id.toString()),
-                  )
-                      : Radio(
-                    value: answer.id.toString(),
-                    groupValue: _selectedAnswers.isNotEmpty
-                        ? _selectedAnswers.first
-                        : null,
-                    onChanged: (value) =>
-                        _handleAnswerSelect(value.toString()),
+                    onChanged: (_) => _handleAnswerSelect(answer.id.toString()),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(child: Text(answer.text)),
                 ],
               ),
             ),
           );
         }).toList(),
-        if (_isMultipleCorrect && _selectedAnswers.isNotEmpty)
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: ElevatedButton(
-              onPressed: _submitAnswer,
-              child: Text('Confirmer'),
-            ),
+        const SizedBox(height: 20),
+        if (_selectedAnswers.isNotEmpty)
+          if (_selectedAnswers.isNotEmpty && !_answerConfirmed)
+          ElevatedButton(
+            onPressed: _submitAnswer,
+            child: const Text('Confirmer la réponse'),
           ),
       ],
     );
