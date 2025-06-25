@@ -104,8 +104,8 @@ class FormationRepository {
 
   Future<void> inscrireAFormation(int formationId) async {
     // À adapter selon l'endpoint réel de votre API
-    final response = await apiClient.post('/stagiaire/inscription', data: {
-      'formation_id': formationId,
+    final response = await apiClient.post('/stagiaire/inscription-catalogue-formation', data: {
+      'catalogue_formation_id': formationId,
     });
     // Vous pouvez traiter la réponse ici si besoin
     if (response.statusCode != 200 && response.statusCode != 201) {
