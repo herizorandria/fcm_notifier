@@ -10,11 +10,11 @@ class AudioQuestion extends StatefulWidget {
   final bool showFeedback;
 
   const AudioQuestion({
-    Key? key,
+    super.key,
     required this.question,
     required this.onAnswer,
     required this.showFeedback,
-  }) : super(key: key);
+  });
 
   @override
   State<AudioQuestion> createState() => _AudioQuestionState();
@@ -24,7 +24,7 @@ class _AudioQuestionState extends State<AudioQuestion> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   bool _isMuted = false;
-  double _volume = 1.0;
+  final double _volume = 1.0;
   String? _selectedAnswer;
   bool _audioError = false;
   Duration _duration = Duration.zero;

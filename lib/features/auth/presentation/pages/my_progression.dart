@@ -7,7 +7,7 @@ import 'package:wizi_learn/features/auth/data/models/progress_stats.dart';
 import 'package:wizi_learn/features/auth/data/repositories/progression_repository.dart';
 
 class ProgressPage extends StatefulWidget {
-  const ProgressPage({Key? key}) : super(key: key);
+  const ProgressPage({super.key});
 
   @override
   _ProgressPageState createState() => _ProgressPageState();
@@ -296,7 +296,7 @@ class _ProgressPageState extends State<ProgressPage> {
                 ),
               ),
             );
-          }).toList(),
+          }),
       ],
     );
   }

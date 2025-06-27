@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:wizi_learn/features/auth/data/models/stats_model.dart';
 
 class QuizStatsWidget extends StatelessWidget {
