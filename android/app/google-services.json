@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "69521612278",
+    "project_id": "wizi-learn",
+    "storage_bucket": "wizi-learn.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69521612278:android:4960987660ffb71f7c7bd7",
+        "android_client_info": {
+          "package_name": "com.example.wizi_learn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAInLFdPyH2vHMKH8u6ZofxhhszerRIPhI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

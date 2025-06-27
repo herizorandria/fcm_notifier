@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'custom_app_bar.dart';
 import 'custom_drawer.dart';
 import 'custom_bottom_navbar.dart';
+import 'package:dio/dio.dart';
 
 class CustomScaffold extends StatefulWidget {
   final Widget body;
@@ -37,7 +38,7 @@ class _CustomScaffoldState extends State<CustomScaffold> {
   void initState() {
     super.initState();
     final apiClient = ApiClient(
-      dio: null,
+      dio: Dio(),
       storage: const FlutterSecureStorage(),
     );
     _notificationRepository = NotificationRepository(apiClient: apiClient);
@@ -87,9 +88,14 @@ class _CustomScaffoldState extends State<CustomScaffold> {
               },
               child: Container(
                 margin: const EdgeInsets.all(12),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryAccent, // Utilisation de la couleur primaire
+                  color:
+                      AppColors
+                          .primaryAccent, // Utilisation de la couleur primaire
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -101,7 +107,11 @@ class _CustomScaffoldState extends State<CustomScaffold> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.card_giftcard, size: 30, color: theme.colorScheme.onPrimary),
+                    Icon(
+                      Icons.card_giftcard,
+                      size: 30,
+                      color: theme.colorScheme.onPrimary,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: RichText(
@@ -117,13 +127,19 @@ class _CustomScaffoldState extends State<CustomScaffold> {
                             WidgetSpan(
                               alignment: PlaceholderAlignment.middle,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.amber,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 margin: const EdgeInsets.only(bottom: 4),
-                                child: const Text('des points !', style: TextStyle(color: Colors.black)),
+                                child: const Text(
+                                  'des points !',
+                                  style: TextStyle(color: Colors.black),
+                                ),
                               ),
                             ),
                           ],
@@ -139,7 +155,10 @@ class _CustomScaffoldState extends State<CustomScaffold> {
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: widget.currentIndex,
-        onTabSelected: widget.onTabSelected,
+        onTap: widget.onTabSelected,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedColor: Theme.of(context).colorScheme.primary,
+        unselectedColor: Colors.grey.shade600,
       ),
     );
   }

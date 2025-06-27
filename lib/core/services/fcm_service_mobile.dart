@@ -17,7 +17,11 @@ class FcmService {
     if (settings.authorizationStatus == AuthorizationStatus.denied) {
       if (context != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notifications refusées. Activez-les dans les paramètres pour recevoir des alertes.')),
+          const SnackBar(
+            content: Text(
+              'Notifications refusées. Activez-les dans les paramètres pour recevoir des alertes.',
+            ),
+          ),
         );
       }
       return;
@@ -37,13 +41,15 @@ class FcmService {
       await Dio().post(
         'https://wizi-learn.com/api/fcm-token',
         data: {'token': token},
-        options: Options(headers: {
-          if (authToken != null) 'Authorization': 'Bearer $authToken',
-          'Content-Type': 'application/json',
-        }),
+        options: Options(
+          headers: {
+            if (authToken != null) 'Authorization': 'Bearer $authToken',
+            'Content-Type': 'application/json',
+          },
+        ),
       );
     } catch (e) {
       debugPrint('Erreur lors de l\'envoi du token FCM au backend : $e');
     }
   }
-} 
+}
