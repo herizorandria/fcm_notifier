@@ -72,10 +72,30 @@ class Quiz {
       questions: questionsList,
     );
   }
-
-  // Ajoutez cette méthode pour faciliter le débogage
   @override
   String toString() {
-    return 'Quiz(id: $id, titre: $titre, nbQuestions: ${questions.length})';
+    final buffer = StringBuffer();
+
+    buffer.writeln('Quiz {');
+    buffer.writeln('  id: $id,');
+    buffer.writeln('  titre: $titre,');
+    buffer.writeln('  description: $description,');
+    buffer.writeln('  duree: $duree,');
+    buffer.writeln('  niveau: $niveau,');
+    buffer.writeln('  status: $status,');
+    buffer.writeln('  nbPointsTotal: $nbPointsTotal,');
+
+    // Afficher la formation associée
+    buffer.writeln('  formation: ${formation.toString().replaceAll('\n', '\n  ')},');
+
+    // Afficher toutes les questions avec leurs réponses
+    buffer.writeln('  questions: [');
+    for (final question in questions) {
+      buffer.writeln('    ${question.toString().replaceAll('\n', '\n    ')},');
+    }
+    buffer.writeln('  ]');
+
+    buffer.writeln('}');
+    return buffer.toString();
   }
 }

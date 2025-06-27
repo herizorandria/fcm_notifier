@@ -25,27 +25,73 @@ class _MatchingQuestionState extends State<MatchingQuestion> {
   @override
   void initState() {
     super.initState();
+    debugPrint("🔍 Initialisation de MatchingQuestion pour la question : ${widget.question.text}");
+    debugPrint("👉 Type de question : ${widget.question.type}");
     _initMatchingData();
   }
 
   void _initMatchingData() {
     _matches = {};
-    _leftItems =
-        widget.question.answers.where((a) => a.bankGroup == "left").toList();
-    _availableOptions =
-        widget.question.answers.where((a) => a.bankGroup == "right").toList();
+
+    // Debug: Afficher toutes les réponses
+    debugPrint("🔍 Toutes les réponses:");
+    for (var answer in widget.question.answers) {
+      debugPrint("- ${answer.text} (bankGroup: ${answer.bankGroup}, matchPair: ${answer.matchPair})");
+    }
+
+    // Group answers by bankGroup
+    final answerGroups = <String, List<Answer>>{};
+    for (var answer in widget.question.answers) {
+      final group = answer.bankGroup ?? '';
+      answerGroups.putIfAbsent(group, () => []).add(answer);
+    }
+
+    // Séparer les left/right en fonction de match_pair
+    _leftItems = [];
+    _availableOptions = [];
+
+    answerGroups.forEach((group, answers) {
+      final leftItem = answers.firstWhere(
+            (a) => a.matchPair == "left",
+        orElse: () => Answer(id: "", text: "", correct: false),
+      );
+
+      final rightItem = answers.firstWhere(
+            (a) => a.matchPair == "right",
+        orElse: () => Answer(id: "", text: "", correct: false),
+      );
+
+      if (leftItem.id.isNotEmpty) _leftItems.add(leftItem);
+      if (rightItem.id.isNotEmpty) _availableOptions.add(rightItem);
+    });
+
+    // Alternative si matchPair n'est pas utilisé
+    if (_leftItems.isEmpty && _availableOptions.isEmpty) {
+      _leftItems = widget.question.answers.where((a) => a.position != null && a.position! % 2 == 1).toList();
+      _availableOptions = widget.question.answers.where((a) => a.position != null && a.position! % 2 == 0).toList();
+    }
+
+    // Tri par position
+    _leftItems.sort((a, b) => (a.position ?? 0).compareTo(b.position ?? 0));
+    _availableOptions.sort((a, b) => (a.position ?? 0).compareTo(b.position ?? 0));
+
+    debugPrint("🧩 Éléments LEFT (question): ${_leftItems.map((e) => e.text).toList()}");
+    debugPrint("🧩 Éléments RIGHT (réponses): ${_availableOptions.map((e) => e.text).toList()}");
   }
 
   void _updateMatch(String leftId, String? rightValue) {
+    debugPrint("🔁 Mise à jour du match : $leftId → $rightValue");
     if (rightValue == null || rightValue == "_empty") {
       setState(() {
         _matches.remove(leftId);
+        debugPrint("❌ Suppression du match pour $leftId");
       });
       return;
     }
 
     setState(() {
       _matches[leftId] = rightValue;
+      debugPrint("✅ Match enregistré : $_matches");
     });
 
     // Envoyer les paires de correspondances
@@ -56,12 +102,16 @@ class _MatchingQuestionState extends State<MatchingQuestion> {
     if (!widget.showFeedback) return false;
 
     final leftItem = _leftItems.firstWhere(
-      (item) => item.id.toString() == leftId,
+          (item) => item.id == leftId,
+      orElse: () => Answer(id: "", text: "", correct: false),
     );
+
+    if (leftItem.id.isEmpty) return false;
+
     final userMatch = _matches[leftId];
     final correctMatch = _availableOptions.firstWhere(
-      (option) => option.matchPair == leftItem.id.toString(),
-      orElse: () => Answer(id: "-1", text: "",  correct: false),
+          (option) => option.bankGroup == leftItem.bankGroup,
+      orElse: () => Answer(id: "", text: "", correct: false),
     );
 
     return userMatch == correctMatch.text;
@@ -75,6 +125,7 @@ class _MatchingQuestionState extends State<MatchingQuestion> {
       (option) => option.matchPair == leftItem.id.toString(),
       orElse: () => Answer(id: "-1", text: "Non trouvé", correct: false),
     );
+    debugPrint("📌 Correspondance correcte pour $leftId = ${correctMatch.text}");
     return correctMatch.text;
   }
 

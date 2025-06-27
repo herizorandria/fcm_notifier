@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 class Question {
-  final String id; // Utilisé comme String pour plus de flexibilité
-  final int? quizId; // Optionnel pour les questions liées à un quiz spécifique
+  final String id;
+  final int? quizId;
   final String text;
   final String type;
   final String? explication;
@@ -11,7 +11,7 @@ class Question {
   final String? mediaUrl;
   final String? audioUrl;
   final List<Answer> answers;
-  final List<dynamic>? correctAnswers;
+  final dynamic correctAnswers;
   final QuestionMeta? meta;
   final List<Blank>? blanks;
   final List<MatchingItem>? matching;
@@ -22,14 +22,13 @@ class Question {
   final DateTime? updatedAt;
   dynamic selectedAnswers;
 
-
   Question({
     required this.id,
     this.quizId,
     required this.text,
     required this.type,
     this.explication,
-    this.points = 1, // Valeur par défaut
+    this.points = 1,
     this.astuce,
     this.mediaUrl,
     this.audioUrl,
@@ -47,56 +46,45 @@ class Question {
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
-    // Validation du type de question
     final type = _validateQuestionType(json['type']);
-
-    // Conversion des réponses
     final answers = <Answer>[];
+
     if (json['answers'] is List || json['reponses'] is List) {
       final rawAnswers = (json['answers'] ?? json['reponses']) as List;
       answers.addAll(rawAnswers.map((a) => Answer.fromJson(a)));
     }
 
-
-
-    // Conversion des bonnes réponses
-    List<dynamic>? correctAnswers;
-    if (json['correctAnswers'] != null) {
-      if (json['correctAnswers'] is List) {
-        correctAnswers = json['correctAnswers'] as List;
-      } else if (json['correctAnswers'] is String) {
-        correctAnswers = [json['correctAnswers']];
+    // Handle correct answers - support both Map and List formats
+    dynamic correctAnswers;
+    if (json['correctAnswers'] != null || json['correct_answers'] != null) {
+      final rawCorrectAnswers =
+          json['correctAnswers'] ?? json['correct_answers'];
+      if (rawCorrectAnswers is Map) {
+        correctAnswers = Map<String, String>.from(rawCorrectAnswers);
+      } else if (rawCorrectAnswers is List) {
+        correctAnswers = List<dynamic>.from(rawCorrectAnswers);
       }
     }
 
+    // Handle selected answers - support both Map and List formats
+    dynamic selectedAnswers;
+    if (json['selectedAnswers'] != null || json['selected_answers'] != null) {
+      final rawSelectedAnswers =
+          json['selectedAnswers'] ?? json['selected_answers'];
+      if (rawSelectedAnswers is Map) {
+        selectedAnswers = Map<String, String>.from(rawSelectedAnswers);
+      } else if (rawSelectedAnswers is List) {
+        selectedAnswers = List<dynamic>.from(rawSelectedAnswers);
+      }
+    }
 
-
-    // Conversion des blanks
-    final blanks = json['blanks'] is List
-        ? (json['blanks'] as List).map((b) => Blank.fromJson(b)).toList()
-        : null;
-
-    // Conversion des matching items
-    final matching = json['matching'] is List
-        ? (json['matching'] as List).map((m) => MatchingItem.fromJson(m)).toList()
-        : null;
-
-    // Conversion de la flashcard
-    final flashcard = json['flashcard'] is Map
-        ? FlashCard.fromJson(json['flashcard'])
-        : null;
-
-    // Conversion de la wordbank
-    final wordbank = json['wordbank'] is List
-        ? (json['wordbank'] as List).map((w) => WordBankItem.fromJson(w)).toList()
-        : null;
-
-    // Conversion des dates
-    DateTime? parseDate(dynamic date) {
-      if (date == null) return null;
-      if (date is DateTime) return date;
-      if (date is String) return DateTime.tryParse(date);
-      return null;
+    QuestionMeta? meta;
+    if (json['meta'] != null) {
+      if (json['meta'] is QuestionMeta) {
+        meta = json['meta'] as QuestionMeta;
+      } else if (json['meta'] is Map) {
+        meta = QuestionMeta.fromJson(json['meta']);
+      }
     }
 
     return Question(
@@ -110,19 +98,65 @@ class Question {
       mediaUrl: json['media_url'] ?? json['mediaUrl'],
       audioUrl: json['audio_url'] ?? json['audioUrl'],
       answers: answers,
-      correctAnswers: json['correct_answers'] ?? json['correctAnswers'],
-      meta: json['meta'] is Map ? QuestionMeta.fromJson(json['meta']) : null,
-      blanks: blanks,
-      matching: matching,
-      flashcard: flashcard,
-      wordbank: wordbank,
-      selectedAnswers: json['selected_answers'] != null
-          ? Map<String, String>.from(json['selected_answers'])
-          : null,
-      isCorrect: json['is_correct'] ?? json['isCorrect'],
-      createdAt: parseDate(json['created_at'] ?? json['createdAt']),
-      updatedAt: parseDate(json['updated_at'] ?? json['updatedAt']),
+      isCorrect: json['is_correct'] ?? json['isCorrect'] ?? false,
+      meta: meta,
+      blanks:
+          json['blanks'] is List
+              ? (json['blanks'] as List).map((b) => Blank.fromJson(b)).toList()
+              : null,
+      matching:
+          json['matching'] is List
+              ? (json['matching'] as List)
+                  .map((m) => MatchingItem.fromJson(m))
+                  .toList()
+              : null,
+      flashcard:
+          json['flashcard'] is Map
+              ? FlashCard.fromJson(json['flashcard'])
+              : null,
+      wordbank:
+          json['wordbank'] is List
+              ? (json['wordbank'] as List)
+                  .map((w) => WordBankItem.fromJson(w))
+                  .toList()
+              : null,
+      createdAt: _parseDate(json['created_at'] ?? json['createdAt']),
+      updatedAt: _parseDate(json['updated_at'] ?? json['updatedAt']),
+      correctAnswers: correctAnswers,
+      selectedAnswers: selectedAnswers,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'quiz_id': quizId,
+      'text': text,
+      'type': type,
+      'explication': explication,
+      'points': points,
+      'astuce': astuce,
+      'media_url': mediaUrl,
+      'audio_url': audioUrl,
+      'answers': answers.map((a) => a.toJson()).toList(),
+      'meta': meta?.toJson(),
+      'blanks': blanks?.map((b) => b.toJson()).toList(),
+      'matching': matching?.map((m) => m.toJson()).toList(),
+      'flashcard': flashcard?.toJson(),
+      'wordbank': wordbank?.map((w) => w.toJson()).toList(),
+      'is_correct': isCorrect,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'correct_answers': correctAnswers,
+      'selected_answers': selectedAnswers,
+    };
+  }
+
+  static DateTime? _parseDate(dynamic date) {
+    if (date == null) return null;
+    if (date is DateTime) return date;
+    if (date is String) return DateTime.tryParse(date);
+    return null;
   }
 
   static int _parseInt(dynamic value) {
@@ -140,29 +174,51 @@ class Question {
       'choix multiples',
       'rearrangement',
       'vrai/faux',
-      'banque de mots'
+      'banque de mots',
     };
-    return type != null && validTypes.contains(type)
-        ? type
-        : 'choix multiples'; // Type par défaut
+    return type != null && validTypes.contains(type) ? type : 'choix multiples';
   }
 
-  // Méthode utilitaire pour vérifier si la question est valide
-  bool get isValid {
-    return text.isNotEmpty && answers.isNotEmpty;
-  }
+  bool get isValid => text.isNotEmpty && answers.isNotEmpty;
 
-  // Méthode pour obtenir les réponses correctes
-  List<Answer> get correctAnswersList {
-    return answers.where((a) => a.correct).toList();
+  List<Answer> get correctAnswersList =>
+      answers.where((a) => a.correct).toList();
+
+  Map<String, String> extractCorrectPairs() {
+    final pairs = <String, String>{};
+    if (type != 'correspondance') return pairs;
+
+    final leftItems = answers.where((a) => a.matchPair == 'left');
+    final rightItems = answers.where((a) => a.matchPair == 'right');
+
+    for (final left in leftItems) {
+      final right = rightItems.firstWhere(
+        (r) => r.bankGroup == left.bankGroup,
+        orElse:
+            () =>
+                null
+                    as Answer, // This line will still cause a warning, so let's fix it properly below
+      );
+      if (right != null) {
+        pairs[left.text] = right.text;
+      }
+    }
+    return pairs;
   }
 
   @override
   String toString() {
-    return 'Question(id: $id, text: $text, type: $type)';
+    return 'Question('
+        'id: $id, '
+        'text: $text, '
+        'type: $type, '
+        'isCorrect: $isCorrect, '
+        'selectedAnswers: $selectedAnswers, '
+        'correctAnswers: $correctAnswers, '
+        'meta: ${meta?.toString()}'
+        ')';
   }
 
-  // Méthode pour copier avec modifications
   Question copyWith({
     String? id,
     int? quizId,
@@ -174,7 +230,7 @@ class Question {
     String? mediaUrl,
     String? audioUrl,
     List<Answer>? answers,
-    List<dynamic>? correctAnswers,
+    dynamic correctAnswers,
     QuestionMeta? meta,
     List<Blank>? blanks,
     List<MatchingItem>? matching,
@@ -183,6 +239,7 @@ class Question {
     bool? isCorrect,
     DateTime? createdAt,
     DateTime? updatedAt,
+    dynamic selectedAnswers,
   }) {
     return Question(
       id: id ?? this.id,
@@ -204,6 +261,7 @@ class Question {
       isCorrect: isCorrect ?? this.isCorrect,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      selectedAnswers: selectedAnswers ?? this.selectedAnswers,
     );
   }
 }
@@ -237,15 +295,44 @@ class Answer {
     return Answer(
       id: json['id']?.toString() ?? '0',
       text: json['text'] as String? ?? '',
-      correct: (json['is_correct'] ?? json['isCorrect']) == true || (json['is_correct'] ?? json['isCorrect']) == 1,
+      correct:
+          (json['is_correct'] ?? json['isCorrect']) == true ||
+          (json['is_correct'] ?? json['isCorrect']) == 1,
       flashcardBack: json['flashcard_back'] ?? json['flashcardBack'],
-      position: json['position'] as int?,
+      position:
+          json['position'] != null
+              ? int.tryParse(json['position'].toString())
+              : null,
       matchPair: json['match_pair'] ?? json['matchPair'],
-      bankGroup: json['bank_group'] ?? json['bankGroup'],
-      questionId: json['question_id']?.toString() ?? json['questionId']?.toString(),
-      createdAt: json['created_at'] is String ? DateTime.tryParse(json['created_at']) : null,
-      updatedAt: json['updated_at'] is String ? DateTime.tryParse(json['updated_at']) : null,
+      bankGroup:
+          json['bank_group']?.toString().toLowerCase() ??
+          json['bankGroup']?.toString().toLowerCase(),
+      questionId:
+          json['question_id']?.toString() ?? json['questionId']?.toString(),
+      createdAt:
+          json['created_at'] is String
+              ? DateTime.tryParse(json['created_at'])
+              : null,
+      updatedAt:
+          json['updated_at'] is String
+              ? DateTime.tryParse(json['updated_at'])
+              : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'text': text,
+      'is_correct': correct,
+      'flashcard_back': flashcardBack,
+      'position': position,
+      'match_pair': matchPair,
+      'bank_group': bankGroup,
+      'question_id': questionId,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
   }
 
   Answer copyWith({
@@ -275,7 +362,6 @@ class Answer {
   }
 }
 
-// Modèles supplémentaires
 class Blank {
   final String id;
   final String text;
@@ -287,6 +373,10 @@ class Blank {
       id: json['id']?.toString() ?? '0',
       text: json['text'] as String? ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'text': text};
   }
 }
 
@@ -304,6 +394,10 @@ class MatchingItem {
       matchPair: json['match_pair'] ?? json['matchPair'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'text': text, 'match_pair': matchPair};
+  }
 }
 
 class FlashCard {
@@ -317,6 +411,10 @@ class FlashCard {
       front: json['front'] as String? ?? '',
       back: json['back'] ?? json['flashcard_back'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'front': front, 'back': back};
   }
 }
 
@@ -334,19 +432,30 @@ class WordBankItem {
       bankGroup: json['bank_group'] ?? json['bankGroup'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'text': text, 'bank_group': bankGroup};
+  }
 }
 
 class QuestionMeta {
-  final int? timeLimit; // en secondes
+  final int? timeLimit;
   final bool? hasHint;
   final bool? showSolution;
   final int? attemptsAllowed;
+  final dynamic correctAnswers;
+  final dynamic selectedAnswers;
+  // champs isCorrect
+  final bool? isCorrect;
 
   QuestionMeta({
     this.timeLimit,
     this.hasHint,
     this.showSolution,
     this.attemptsAllowed,
+    this.correctAnswers,
+    this.selectedAnswers,
+    this.isCorrect,
   });
 
   factory QuestionMeta.fromJson(Map<String, dynamic> json) {
@@ -355,7 +464,22 @@ class QuestionMeta {
       hasHint: json['has_hint'] as bool?,
       showSolution: json['show_solution'] as bool?,
       attemptsAllowed: json['attempts_allowed'] as int?,
+      correctAnswers: json['correct_answers'],
+      selectedAnswers: json['selected_answers'],
+      isCorrect: json['is_correct'] ?? json['isCorrect'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'time_limit': timeLimit,
+      'has_hint': hasHint,
+      'show_solution': showSolution,
+      'attempts_allowed': attemptsAllowed,
+      'correct_answers': correctAnswers,
+      'selected_answers': selectedAnswers,
+      'is_correct': isCorrect,
+    };
   }
 }
 
@@ -379,16 +503,35 @@ class QuizSubmissionResponse {
   });
 
   factory QuizSubmissionResponse.fromJson(Map<String, dynamic> json) {
+    List<Question> parsedQuestions = [];
+
+    if (json['questions'] is List) {
+      parsedQuestions =
+          (json['questions'] as List).map((q) {
+            try {
+              return Question.fromJson(q);
+            } catch (e) {
+              debugPrint('Error parsing question: $e');
+              return Question(
+                id: q['id']?.toString() ?? '0',
+                text: q['text'] ?? '',
+                type: q['type'] ?? 'choix multiples',
+                answers: [],
+                isCorrect: q['isCorrect'] ?? false,
+                selectedAnswers: q['selectedAnswers'],
+              );
+            }
+          }).toList();
+    }
+
     return QuizSubmissionResponse(
-      id: json['id'] as int,
-      quizId: json['quizId'] as int,
-      score: json['score'] as int,
-      correctAnswers: json['correctAnswers'] as int,
-      totalQuestions: json['totalQuestions'] as int,
-      timeSpent: json['timeSpent'] as int,
-      questions: (json['questions'] as List)
-          .map((q) => Question.fromJson(q as Map<String, dynamic>))
-          .toList(),
+      id: json['id'] as int? ?? 0,
+      quizId: json['quizId'] as int? ?? 0,
+      score: json['score'] as int? ?? 0,
+      correctAnswers: json['correctAnswers'] as int? ?? 0,
+      totalQuestions: json['totalQuestions'] as int? ?? parsedQuestions.length,
+      timeSpent: json['timeSpent'] as int? ?? 0,
+      questions: parsedQuestions,
     );
   }
 }

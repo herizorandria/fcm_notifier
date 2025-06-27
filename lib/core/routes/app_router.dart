@@ -7,7 +7,7 @@ import 'package:wizi_learn/features/auth/presentation/pages/ranking_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/sponsor_ship_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/user_point_page.dart';
 import '../constants/route_constants.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/auth/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 
 class AppRouter {

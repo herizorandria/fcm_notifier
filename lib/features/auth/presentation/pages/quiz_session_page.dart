@@ -9,7 +9,7 @@ import 'package:wizi_learn/core/network/api_client.dart';
 import 'package:wizi_learn/features/auth/data/models/question_model.dart';
 import 'package:wizi_learn/features/auth/data/models/quiz_model.dart';
 import 'package:wizi_learn/features/auth/data/repositories/quiz_repository.dart';
-import 'package:wizi_learn/features/auth/presentation/pages/QuestionType.dart';
+import 'package:wizi_learn/features/auth/presentation/pages/question_type_page.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/quiz_summary_page.dart';
 
 class QuizSessionPage extends StatefulWidget {
@@ -42,6 +42,8 @@ class _QuizSessionPageState extends State<QuizSessionPage> {
     );
     _quizRepository = QuizRepository(apiClient: apiClient);
     _startQuestionTimer();
+    debugPrint("📋 Quiz complet reçu :");
+    debugPrint(widget.quiz.toString());
   }
 
   @override
@@ -76,26 +78,51 @@ class _QuizSessionPageState extends State<QuizSessionPage> {
   }
 
   void _handleAnswer(dynamic answer) {
-    final questionId = widget.questions[_currentQuestionIndex].id.toString();
-    _userAnswers[questionId] =
-        (answer is List)
-            ? answer.map((a) => a['id'].toString()).toList()
-            : [answer['id'].toString()];
+    final question = widget.questions[_currentQuestionIndex];
+    final questionId = question.id.toString();
+
+    if (question.type == "correspondance") {
+      if (answer is Map) {
+        _userAnswers[questionId] = answer;
+      } else {
+        debugPrint("⚠️ Invalid answer format for matching question");
+        return;
+      }
+    } else if (question.type == "vrai/faux") {
+      // Pour les questions vrai/faux, answer est une liste de textes
+      if (answer is List) {
+        _userAnswers[questionId] = answer;
+      }
+    } else if (answer is List) {
+      _userAnswers[questionId] = answer.map((a) => a['id'].toString()).toList();
+    } else if (answer is Map && answer.containsKey('id')) {
+      _userAnswers[questionId] = [answer['id'].toString()];
+    } else {
+      _userAnswers[questionId] = answer;
+    }
+
+    debugPrint(
+      "💾 Saved answer for QID $questionId (${question.type}): ${_userAnswers[questionId]}",
+    );
   }
 
   void _goToNextQuestion() {
     // Vérifie que la question courante a été répondue
-    final currentQuestionId = widget.questions[_currentQuestionIndex].id.toString();
+    final currentQuestionId =
+        widget.questions[_currentQuestionIndex].id.toString();
     if (!_userAnswers.containsKey(currentQuestionId)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Veuillez répondre à la question avant de continuer')),
+        SnackBar(
+          content: Text('Veuillez répondre à la question avant de continuer'),
+        ),
       );
       return;
     }
 
     // Enregistre le temps passé
     if (_questionStartTime != null) {
-      final timeSpent = DateTime.now().difference(_questionStartTime!).inSeconds;
+      final timeSpent =
+          DateTime.now().difference(_questionStartTime!).inSeconds;
       _totalTimeSpent += timeSpent;
     }
 
@@ -152,65 +179,66 @@ class _QuizSessionPageState extends State<QuizSessionPage> {
   }
 
   Future<void> _completeQuiz() async {
-    setState(() {
-      _quizCompleted = true;
-    });
+    setState(() => _quizCompleted = true);
     _timer.cancel();
 
-    // Injecte les réponses dans les objets Question AVANT de calculer le score
-    for (final question in widget.questions) {
-      final answer = _userAnswers[question.id.toString()];
-      question.selectedAnswers = answer;
-    }
+    try {
+      final quizResult = await _submitQuiz();
 
-    final questions = widget.questions;
-
-    final correctCount =
-        questions
-            .where((q) => QuizUtils.isAnswerCorrect(q, q.selectedAnswers))
-            .length;
-
-    final totalScore = correctCount * 2;
-
-    final quizResult = await _submitQuiz();
-
-    if (quizResult != null && mounted) {
-      try {
-        final response = QuizSubmissionResponse.fromJson(quizResult);
-        print('DEBUG: correctCount = $correctCount');
-        print('DEBUG: totalScore = $totalScore');
-        print('DEBUG: response.totalQuestions = ${response.totalQuestions}');
-        print('DEBUG: response.timeSpent = ${response.timeSpent}');
-
+      if (quizResult != null) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder:
                 (context) => QuizSummaryPage(
-                  questions: widget.questions,
-                  score: totalScore,
-                  correctAnswers: correctCount,
-                  totalQuestions: response.totalQuestions,
-                  timeSpent: response.timeSpent,
+                  questions:
+                      (quizResult['questions'] as List)
+                          .map((q) => Question.fromJson(q))
+                          .toList(),
+                  score: quizResult['score'] ?? 0,
+                  correctAnswers: quizResult['correctAnswers'] ?? 0,
+                  totalQuestions: quizResult['totalQuestions'] ?? 0,
+                  timeSpent: quizResult['timeSpent'] ?? _totalTimeSpent,
+                  quizResult: quizResult, // Passer tout l'objet résulta
                 ),
           ),
         );
-      } catch (e, stack) {
-        debugPrint('Error parsing quiz result: $e\n$stack');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => QuizSummaryPage(
-                  questions: questions,
-                  score: totalScore,
-                  correctAnswers: correctCount,
-                  totalQuestions: questions.length,
-                  timeSpent: _totalTimeSpent,
-                ),
-          ),
+      } else {
+        _showFallbackSummary(
+          widget.questions,
+          0, // or calculate the correct count if possible
+          0, // or calculate the total score if possible
         );
       }
+    } catch (e) {
+      debugPrint('Error submitting quiz: $e');
+      _showFallbackSummary(
+        widget.questions,
+        0, // or calculate the correct count if possible
+        0, // or calculate the total score if possible
+      );
+    }
+  }
+
+  void _showFallbackSummary(
+    List<Question> questions,
+    int correctCount,
+    int totalScore,
+  ) {
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => QuizSummaryPage(
+                questions: questions,
+                score: totalScore,
+                correctAnswers: correctCount,
+                totalQuestions: questions.length,
+                timeSpent: _totalTimeSpent,
+              ),
+        ),
+      );
     }
   }
 

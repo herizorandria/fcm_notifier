@@ -144,7 +144,7 @@ class QuestionTypePage extends StatelessWidget {
       case "vrai/faux":
         return TrueFalseQuestion(
           question: question,
-          onAnswer: onAnswer,
+          onAnswer: (answers) => onAnswer(answers),
           showFeedback: showFeedback,
         );
       case "remplir le champ vide":

@@ -1,8 +1,7 @@
-// QuestionAnswer.dart
 class Question {
   final String id;
   final String text;
-  final String type; // ou enum si vous préférez
+  final String type;
   final int? points;
   final String? astuce;
   final String? explication;
@@ -15,7 +14,7 @@ class Question {
   final FlashCard? flashcard;
   final List<WordBankItem>? wordbank;
   final List<String>? correctAnswers;
-  final dynamic selectedAnswers; // Peut être String, List<String> ou Map
+  final dynamic selectedAnswers;
   final bool? isCorrect;
 
   Question({
@@ -39,6 +38,41 @@ class Question {
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
+    final answers = (json['answers'] ?? json['reponses']) as List<dynamic>?;
+
+    dynamic correctAnswers;
+    if (json['correctAnswers'] != null || json['correct_answers'] != null) {
+      final rawCorrectAnswers = json['correctAnswers'] ?? json['correct_answers'];
+
+      if (rawCorrectAnswers is Map) {
+        correctAnswers = Map<String, String>.from(rawCorrectAnswers);
+      } else if (rawCorrectAnswers is List) {
+        // Cas des paires left/right
+        correctAnswers = rawCorrectAnswers.fold<Map<String, dynamic>>({}, (map, item) {
+          if (item is Map && item['left'] != null && item['right'] != null) {
+            map[item['left'].toString()] = item['right'].toString();
+          }
+          return map;
+        });
+      } else if (rawCorrectAnswers is String) {
+        correctAnswers = [rawCorrectAnswers];
+      }
+    }
+
+    // Conversion des réponses sélectionnées
+    dynamic selectedAnswers;
+    if (json['selectedAnswers'] != null || json['selected_answers'] != null) {
+      final rawSelectedAnswers = json['selectedAnswers'] ?? json['selected_answers'];
+
+      if (rawSelectedAnswers is Map) {
+        selectedAnswers = Map<String, String>.from(rawSelectedAnswers);
+      } else if (rawSelectedAnswers is List) {
+        selectedAnswers = rawSelectedAnswers;
+      } else if (rawSelectedAnswers is String) {
+        selectedAnswers = [rawSelectedAnswers];
+      }
+    }
+
     return Question(
       id: json['id'].toString(),
       text: json['text'],
@@ -72,6 +106,47 @@ class Question {
       selectedAnswers: json['selectedAnswers'],
       isCorrect: json['isCorrect'],
     );
+  }
+
+  @override
+  String toString() {
+    final buffer = StringBuffer();
+    buffer.writeln('Question {');
+    buffer.writeln('  id: $id,');
+    buffer.writeln('  text: $text,');
+    buffer.writeln('  type: $type,');
+    buffer.writeln('  points: $points,');
+    buffer.writeln('  astuce: $astuce,');
+    buffer.writeln('  explication: $explication,');
+
+    if (audioUrl != null) buffer.writeln('  audioUrl: $audioUrl,');
+    if (mediaUrl != null) buffer.writeln('  mediaUrl: $mediaUrl,');
+
+    // Answers
+    if (answers.isNotEmpty) {
+      buffer.writeln('  answers: [');
+      for (final answer in answers) {
+        buffer.writeln('    ${answer.toString().replaceAll('\n', '\n    ')},');
+      }
+      buffer.writeln('  ],');
+    }
+
+    // Other optional fields
+    if (blanks != null && blanks!.isNotEmpty) {
+      buffer.writeln('  blanks: $blanks,');
+    }
+    if (matching != null && matching!.isNotEmpty) {
+      buffer.writeln('  matching: $matching,');
+    }
+    if (flashcard != null) {
+      buffer.writeln('  flashcard: $flashcard,');
+    }
+    if (wordbank != null && wordbank!.isNotEmpty) {
+      buffer.writeln('  wordbank: $wordbank,');
+    }
+
+    buffer.writeln('}');
+    return buffer.toString();
   }
 }
 
@@ -121,13 +196,21 @@ class Answer {
     );
   }
 
-  // Helper pour vérifier si la réponse est correcte (prend en compte les deux champs possibles)
-  bool get correct {
-    return isCorrect ?? is_correct ?? false;
+  bool get correct => isCorrect ?? is_correct ?? false;
+
+  @override
+  String toString() {
+    return 'Answer {'
+        'id: $id, '
+        'text: $text, '
+        'isCorrect: $correct, '
+        'flashcardBack: $flashcardBack, '
+        'matchPair: $matchPair'
+        '}';
   }
 }
 
-// Modèles supplémentaires dont vous pourriez avoir besoin
+// ===== Modèles supplémentaires =====
 class Blank {
   final String id;
   final String text;
@@ -140,6 +223,9 @@ class Blank {
       text: json['text'],
     );
   }
+
+  @override
+  String toString() => 'Blank {id: $id, text: $text}';
 }
 
 class MatchingItem {
@@ -156,6 +242,9 @@ class MatchingItem {
       matchPair: json['match_pair'] ?? json['matchPair'],
     );
   }
+
+  @override
+  String toString() => 'MatchingItem {id: $id, text: $text, matchPair: $matchPair}';
 }
 
 class FlashCard {
@@ -170,6 +259,9 @@ class FlashCard {
       back: json['back'] ?? json['flashcard_back'],
     );
   }
+
+  @override
+  String toString() => 'FlashCard {front: $front, back: $back}';
 }
 
 class WordBankItem {
@@ -186,4 +278,7 @@ class WordBankItem {
       bankGroup: json['bank_group'] ?? json['bankGroup'],
     );
   }
+
+  @override
+  String toString() => 'WordBankItem {id: $id, text: $text, bankGroup: $bankGroup}';
 }

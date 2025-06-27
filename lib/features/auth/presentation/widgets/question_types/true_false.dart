@@ -25,7 +25,6 @@ class _TrueFalseQuestionState extends State<TrueFalseQuestion> {
     super.initState();
     _selectedAnswers = [];
 
-    // Initialiser avec les réponses sélectionnées existantes
     if (widget.question.selectedAnswers != null) {
       if (widget.question.selectedAnswers is List) {
         _selectedAnswers = List<String>.from(
@@ -44,14 +43,18 @@ class _TrueFalseQuestionState extends State<TrueFalseQuestion> {
       _selectedAnswers = [answerId];
     });
 
-    final selected = widget.question.answers.firstWhere(
+    // Trouver la réponse complète
+    final selectedAnswer = widget.question.answers.firstWhere(
       (a) => a.id.toString() == answerId,
+      orElse: () => Answer(id: '', text: '', correct: false),
     );
 
-    // Envoyer le texte de la réponse (ex: "Vrai" ou "Faux")
-    widget.onAnswer([
-      {'id': selected.id, 'text': selected.text},
-    ]);
+    if (selectedAnswer.id.isNotEmpty) {
+      // Envoyer le TEXTE de la réponse
+      widget.onAnswer([
+        {'text': selectedAnswer.text},
+      ]);
+    }
   }
 
   bool _isCorrectAnswer(String answerId) {
