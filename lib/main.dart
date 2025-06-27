@@ -7,13 +7,24 @@ import 'core/routes/app_router.dart';
 import 'core/constants/route_constants.dart';
 import 'features/auth/auth_injection_container.dart' as auth_injection;
 import 'features/auth/data/repositories/auth_repository.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'core/services/fcm_service.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // Ici, vous pouvez gérer la notification reçue en arrière-plan si besoin
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   // Initialize dependencies
   await auth_injection.initAuthDependencies();
-
+  // Initialisation FCM custom
+  await FcmService().initFcm();
   runApp(const MyApp());
 }
 
@@ -23,6 +34,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialisation de la gestion des notifications locales
+    _initLocalNotifications();
+    // Initialisation FCM avec gestion du contexte
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FcmService().initFcm(context);
+    });
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthRepository>(
@@ -116,6 +133,33 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _initLocalNotifications() {
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      if (notification != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'channel_id',
+              'Notifications',
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
+          ),
+        );
+      }
+    });
   }
 }
 
