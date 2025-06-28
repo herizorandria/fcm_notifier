@@ -57,7 +57,7 @@ class GlobalRanking {
   final Stagiaire stagiaire;
   final int totalPoints;
   final int quizCount;
-  final int averageScore;
+  final double averageScore;
   final int rang;
 
   GlobalRanking({
@@ -73,7 +73,10 @@ class GlobalRanking {
       stagiaire: Stagiaire.fromJson(json['stagiaire']),
       totalPoints: json['totalPoints'],
       quizCount: json['quizCount'],
-      averageScore: json['averageScore'],
+      averageScore:
+          (json['averageScore'] is int)
+              ? (json['averageScore'] as int).toDouble()
+              : json['averageScore'],
       rang: json['rang'],
     );
   }
@@ -127,7 +130,7 @@ class QuizStats {
 class CategoryStat {
   final String category;
   final int quizCount;
-  final int averageScore;
+  final double averageScore;
 
   CategoryStat({
     required this.category,
@@ -139,7 +142,10 @@ class CategoryStat {
     return CategoryStat(
       category: json['category'],
       quizCount: json['quizCount'],
-      averageScore: json['averageScore'],
+      averageScore:
+          (json['averageScore'] is int)
+              ? (json['averageScore'] as int).toDouble()
+              : json['averageScore'],
     );
   }
 }
@@ -166,14 +172,17 @@ class LevelProgress {
 
 class LevelData {
   final int completed;
-  final int? averageScore;
+  final double? averageScore;
 
   LevelData({required this.completed, required this.averageScore});
 
   factory LevelData.fromJson(Map<String, dynamic> json) {
     return LevelData(
       completed: json['completed'],
-      averageScore: json['averageScore'],
+      averageScore:
+          (json['averageScore'] is int)
+              ? (json['averageScore'] as int).toDouble()
+              : json['averageScore'],
     );
   }
 }

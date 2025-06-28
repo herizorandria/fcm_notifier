@@ -8,11 +8,11 @@ class ContactRepository {
   ContactRepository({required this.apiClient});
   Future<List<Contact>> getContacts() async {
     final response = await apiClient.get(AppConstants.contact);
-    print('Données reçues : ${response.data}');
+    // print('Données reçues : ${response.data}');
 
     final data = response.data;
     List<Contact> contacts = [];
-  
+
     // Vérifie bien que c'est une liste
     final commerciaux = data['commerciaux'];
     final formateurs = data['formateurs'];
@@ -38,5 +38,4 @@ class ContactRepository {
 
     return contacts;
   }
-
 }

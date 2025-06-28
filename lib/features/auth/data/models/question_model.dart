@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 class Question {
   final String id;
@@ -511,7 +510,7 @@ class QuizSubmissionResponse {
             try {
               return Question.fromJson(q);
             } catch (e) {
-              debugPrint('Error parsing question: $e');
+              // debugPrint('Error parsing question: $e');
               return Question(
                 id: q['id']?.toString() ?? '0',
                 text: q['text'] ?? '',

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:wizi_learn/core/exceptions/api_exception.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -84,7 +83,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> getMe() async {
     try {
       final response = await apiClient.get(AppConstants.meEndpoint);
-      debugPrint('Réponse getMe : ${response.data}');
+      // debugPrint('Réponse getMe : ${response.data}');
 
       return UserModel.fromJson(response.data);
     } on DioException catch (e) {
