@@ -53,32 +53,36 @@ class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
   }
 
   void _submitAnswer() {
-    if (_selectedAnswers.isEmpty) return;
+    if (_selectedAnswers.isEmpty) {
+      // Envoyer une liste vide explicitement si aucune réponse n'est sélectionnée
+      widget.onAnswer([]);
+      setState(() {
+        _answerConfirmed = true;
+      });
+      return;
+    }
 
-    final response =
-        _selectedAnswers.map((id) {
-          final answer = widget.question.answers.firstWhere(
-            (a) => a.id.toString() == id,
-          );
-          return {'id': answer.id.toString(), 'text': answer.text};
-        }).toList();
+    // Récupérer les textes des réponses sélectionnées
+    final selectedTexts = _selectedAnswers.map((id) {
+      return widget.question.answers
+          .firstWhere((a) => a.id.toString() == id)
+          .text;
+    }).toList();
 
-    widget.onAnswer(response); // Enregistre la réponse localement
+    widget.onAnswer(selectedTexts);
     setState(() {
-      _answerConfirmed = true; // Marquer la réponse comme confirmée
+      _answerConfirmed = true;
     });
-    // Affiche un message de confirmation
+
     Fluttertoast.showToast(
       msg: "Réponse sauvegardée avec succès !",
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.TOP, // ou CENTER, BOTTOM, etc.
+      gravity: ToastGravity.TOP,
       backgroundColor: Colors.green[500],
       textColor: Colors.white,
       fontSize: 16.0,
-      timeInSecForIosWeb: 2,
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Column(

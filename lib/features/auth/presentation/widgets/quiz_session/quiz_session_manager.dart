@@ -53,15 +53,17 @@ class QuizSessionManager {
       _userAnswers[questionId] = answer;
     } else if (question.type == "vrai/faux" && answer is List) {
       _userAnswers[questionId] = answer;
-    } else if (answer is List) {
-      _userAnswers[questionId] = answer.map((a) => a['id'].toString()).toList();
+    } else if (question.type == "choix multiples") {
+      // Toujours stocker la réponse, même si c'est une liste vide
+      _userAnswers[questionId] = answer is List ? answer : [];
     } else if (answer is Map && answer.containsKey('id')) {
       _userAnswers[questionId] = [answer['id'].toString()];
     } else {
       _userAnswers[questionId] = answer;
     }
-  }
 
+    debugPrint("Stored answer for $questionId: ${_userAnswers[questionId]}");
+  }
   void goToNextQuestion() {
     final currentQuestionId =
         questions[currentQuestionIndex.value].id.toString();
