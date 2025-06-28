@@ -46,8 +46,8 @@ class _OrderingQuestionState extends State<OrderingQuestion> {
       final answer = _orderedAnswers.removeAt(oldIndex);
       _orderedAnswers.insert(newIndex, answer);
 
-      // Envoyer la liste des IDs dans l'ordre
-      widget.onAnswer(_orderedAnswers.map((a) => a.id.toString()).toList());
+      // Envoyer la liste des textes dans l'ordre
+      widget.onAnswer(_orderedAnswers.map((a) => a.text).toList());
     });
   }
 
@@ -120,7 +120,7 @@ class _OrderingQuestionState extends State<OrderingQuestion> {
                   final answer = _orderedAnswers.removeAt(oldIndex);
                   _orderedAnswers.insert(newIndex, answer);
                   widget.onAnswer(
-                    _orderedAnswers.map((a) => a.id.toString()).toList(),
+                    _orderedAnswers.map((a) => a.text).toList(),
                   );
                 });
               },
