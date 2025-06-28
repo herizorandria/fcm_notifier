@@ -1,7 +1,7 @@
 class AppConstants {
   static const String appName = "Wizi Learn";
-  static const String baseUrl = "https://wizi-learn.com/api";
-  static const String baseUrlImg = "https://wizi-learn.com";
+  static const String baseUrl = "https://wizi-learn.testeninterne.com/api";
+  static const String baseUrlImg = "https://wizi-learn.testeninterne.com";
   static const String loginEndpoint = "/login";
   static const String logoutEndpoint = "/logout";
   static const String userEndpoint = "/user";
@@ -29,9 +29,7 @@ class AppConstants {
   static const Duration splashDuration = Duration(seconds: 2);
 
   static String getUserImageUrl(String path) {
-    final timestamp = DateTime
-        .now()
-        .millisecondsSinceEpoch;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '$baseUrlImg/$path?$timestamp';
   }
 
