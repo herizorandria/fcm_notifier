@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/core/constants/route_constants.dart';
 import 'package:wizi_learn/features/auth/presentation/constants/couleur_palette.dart';
+import 'package:wizi_learn/features/auth/data/repositories/notification_repository.dart';
+import 'package:wizi_learn/core/network/api_client.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'custom_app_bar.dart';
 import 'custom_drawer.dart';
 import 'custom_bottom_navbar.dart';
+import 'package:dio/dio.dart';
 
-class CustomScaffold extends StatelessWidget {
+class CustomScaffold extends StatefulWidget {
   final Widget body;
   final List<Widget>? actions;
   final int currentIndex;
@@ -22,6 +27,34 @@ class CustomScaffold extends StatelessWidget {
   });
 
   @override
+  State<CustomScaffold> createState() => _CustomScaffoldState();
+}
+
+class _CustomScaffoldState extends State<CustomScaffold> {
+  int _unreadCount = 0;
+  late final NotificationRepository _notificationRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    final apiClient = ApiClient(
+      dio: Dio(),
+      storage: const FlutterSecureStorage(),
+    );
+    _notificationRepository = NotificationRepository(apiClient: apiClient);
+    _loadUnreadCount();
+    FirebaseMessaging.onMessage.listen((_) => _loadUnreadCount());
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final count = await _notificationRepository.getUnreadCount();
+      setState(() {
+        _unreadCount = count;
+      });
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -33,38 +66,36 @@ class CustomScaffold extends StatelessWidget {
         actions: [
           IconButton(
             icon: Badge(
-              label: const Text('15'),
-              child: const Icon(Icons.star),
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, RouteConstants.userPoints);
-            },
-          ),
-          IconButton(
-            icon: Badge(
-              label: const Text('3'),
+              label: Text(_unreadCount > 0 ? '$_unreadCount' : ''),
+              isLabelVisible: _unreadCount > 0,
               child: const Icon(Icons.notifications),
             ),
-            onPressed: () {
-              Navigator.pushNamed(context, RouteConstants.notifications);
+            onPressed: () async {
+              await Navigator.pushNamed(context, RouteConstants.notifications);
+              _loadUnreadCount();
             },
           ),
-          ...?actions,
+          ...?widget.actions,
         ],
       ),
       drawer: const CustomDrawer(),
       body: Column(
         children: [
-          if (showBanner)
+          if (widget.showBanner)
             GestureDetector(
               onTap: () {
                 Navigator.pushNamed(context, RouteConstants.sponsorship);
               },
               child: Container(
                 margin: const EdgeInsets.all(12),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryAccent, // Utilisation de la couleur primaire
+                  color:
+                      AppColors
+                          .primaryAccent, // Utilisation de la couleur primaire
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -76,7 +107,11 @@ class CustomScaffold extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.card_giftcard, size: 30, color: theme.colorScheme.onPrimary),
+                    Icon(
+                      Icons.card_giftcard,
+                      size: 30,
+                      color: theme.colorScheme.onPrimary,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: RichText(
@@ -90,50 +125,45 @@ class CustomScaffold extends StatelessWidget {
                           children: [
                             const TextSpan(text: 'Parraine et gagne '),
                             WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: Colors.amber,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text(
-                                  '50€',
+                                margin: const EdgeInsets.only(bottom: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                child: const Text(
+                                  '50€ ',
                                   style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.black,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        blurRadius: 2,
-                                        offset: const Offset(1, 1),
-                                      ),
-                                    ],
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
                                   ),
                                 ),
                               ),
                             ),
-                            const TextSpan(text: ' !'),
                           ],
                         ),
                       ),
                     ),
-                    Icon(Icons.arrow_forward_ios, color: theme.colorScheme.onPrimary),
                   ],
                 ),
               ),
             ),
-          Expanded(child: body),
+          Expanded(child: widget.body),
         ],
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: currentIndex,
-        onTap: onTabSelected,
-        backgroundColor: theme.colorScheme.surface,
-        selectedColor: theme.colorScheme.primary,
+        currentIndex: widget.currentIndex,
+        onTap: widget.onTabSelected,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedColor: Theme.of(context).colorScheme.primary,
         unselectedColor: Colors.grey.shade600,
       ),
     );
   }
-
 }

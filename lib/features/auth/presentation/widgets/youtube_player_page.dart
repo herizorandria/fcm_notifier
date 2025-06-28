@@ -142,7 +142,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                     Icon(Icons.timer_outlined, size: 18, color: colorScheme.primary),
                     const SizedBox(width: 4),
                     Text(
-                      "Durée: ${currentVideo.duree ?? 'N/A'} min",
+                      "Durée: ${currentVideo.duree ?? '0'} min",
                       style: textTheme.bodySmall,
                     ),
                   ],
@@ -251,7 +251,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            "Durée: ${media.duree ?? 'N/A'}",
+                                            "Durée: ${media.duree ?? '0'}",
                                             style: textTheme.bodySmall?.copyWith(
                                               color: colorScheme.onSurface
                                                   .withOpacity(0.6),

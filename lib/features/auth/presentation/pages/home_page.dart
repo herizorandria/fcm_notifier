@@ -9,6 +9,8 @@ import 'package:wizi_learn/features/auth/data/repositories/formation_repository.
 import 'package:wizi_learn/features/auth/presentation/pages/contact_page.dart';
 import 'package:wizi_learn/features/auth/presentation/components/contact_card.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/random_formations_widget.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   List<Contact> _contacts = [];
   List<Formation> _randomFormations = [];
   bool _isLoading = true;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -34,6 +37,28 @@ class _HomePageState extends State<HomePage> {
     _contactRepository = ContactRepository(apiClient: apiClient);
     _formationRepository = FormationRepository(apiClient: apiClient);
     _loadData();
+    _initFcmListener();
+  }
+
+  void _initFcmListener() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notification = message.notification;
+      if (notification != null) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'channel_id',
+              'Notifications',
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _loadData() async {

@@ -16,7 +16,7 @@ class ParrainageRepository {
 
       return null;
     } catch (e) {
-      print("Erreur lors de la génération du lien : $e");
+      // print("Erreur lors de la génération du lien : $e");
       return null;
     }
   }

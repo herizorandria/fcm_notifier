@@ -10,12 +10,12 @@ class FillBlankQuestion extends StatefulWidget {
   final VoidCallback onTimeout;
 
   const FillBlankQuestion({
-    Key? key,
+    super.key,
     required this.question,
     required this.onAnswer,
     required this.showFeedback,
     required this.onTimeout,
-  }) : super(key: key);
+  });
 
   @override
   _FillBlankQuestionState createState() => _FillBlankQuestionState();

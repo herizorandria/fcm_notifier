@@ -39,7 +39,9 @@ class DailyProgress {
     return DailyProgress(
       date: json['date'],
       completedQuizzes: json['completed_quizzes'],
-      averagePoints: json['average_points'].toDouble(),
+      averagePoints: (json['average_points'] is int)
+          ? (json['average_points'] as int).toDouble()
+          : json['average_points'],
     );
   }
 }
@@ -59,7 +61,9 @@ class WeeklyProgress {
     return WeeklyProgress(
       week: json['week'],
       completedQuizzes: json['completed_quizzes'],
-      averagePoints: json['average_points'].toDouble(),
+      averagePoints: (json['average_points'] is int)
+          ? (json['average_points'] as int).toDouble()
+          : json['average_points'],
     );
   }
 }
@@ -79,7 +83,9 @@ class MonthlyProgress {
     return MonthlyProgress(
       month: json['month'],
       completedQuizzes: json['completed_quizzes'],
-      averagePoints: json['average_points'].toDouble(),
+      averagePoints: (json['average_points'] is int)
+          ? (json['average_points'] as int).toDouble()
+          : json['average_points'],
     );
   }
 }

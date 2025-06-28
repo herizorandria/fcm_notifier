@@ -197,7 +197,7 @@ class _MatchingQuestionState extends State<MatchingQuestion> {
                                 child: Text(option.text),
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                         onChanged:
                             widget.showFeedback
@@ -226,7 +226,7 @@ class _MatchingQuestionState extends State<MatchingQuestion> {
                   ],
                 ),
               );
-            }).toList(),
+            }),
             if (widget.showFeedback) ...[
               const SizedBox(height: 12),
               ..._leftItems
@@ -260,7 +260,7 @@ class _MatchingQuestionState extends State<MatchingQuestion> {
                       ),
                     );
                   })
-                  .toList(),
+                  ,
             ],
           ],
         ),

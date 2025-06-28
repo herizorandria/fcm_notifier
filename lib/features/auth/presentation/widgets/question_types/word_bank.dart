@@ -43,7 +43,7 @@ class _WordBankState extends State<WordBankQuestion> {
 
     // Envoyer les textes des mots sélectionnés
     final selectedTexts = _selectedWords.map((id) {
-      return widget.question.answers!
+      return widget.question.answers
           .firstWhere((a) => a.id == id)
           .text;
     }).toList();
@@ -53,7 +53,7 @@ class _WordBankState extends State<WordBankQuestion> {
   bool? _isWordCorrect(String wordId) {
     if (!widget.showFeedback) return null;
 
-    final answer = widget.question.answers?.firstWhere(
+    final answer = widget.question.answers.firstWhere(
       (a) => a.id == wordId,
       orElse: () => Answer(correct: false, id: '', text: ''),
     );

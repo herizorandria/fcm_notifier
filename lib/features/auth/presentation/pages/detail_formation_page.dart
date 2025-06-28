@@ -21,6 +21,11 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
   late Future<Formation> _futureFormation;
   late FormationRepository _repository;
 
+  // Ajout des états pour l'inscription
+  bool _isLoading = false;
+  bool _success = false;
+  bool _error = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +36,35 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
     _repository = FormationRepository(apiClient: apiClient);
     _futureFormation = _repository.getFormationDetail(widget.formationId);
   }
+
+  Future<void> _inscrireAFormation() async {
+    setState(() {
+      _isLoading = true;
+      _success = false;
+      _error = false;
+    });
+    try {
+      await _repository.inscrireAFormation(widget.formationId);
+      setState(() {
+        _success = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Inscription réussie !')),
+      );
+    } catch (e) {
+      setState(() {
+        _error = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erreur lors de l\'inscription. Veuillez réessayer.')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -318,16 +352,20 @@ class _FormationDetailPageState extends State<FormationDetailPage> {
                       elevation: 2,
                       shadowColor: const Color(0xFFB07661).withOpacity(0.3),
                     ),
-                    onPressed: () {
-                      // TODO: Gérer l'inscription
-                    },
-                    child: Text(
-                      "S'inscrire à cette formation",
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                    onPressed: _isLoading ? null : _inscrireAFormation,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            _success
+                                ? "Inscription réussie !"
+                                : _error
+                                    ? "Erreur, réessayer"
+                                    : "S'inscrire à cette formation",
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ],

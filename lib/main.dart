@@ -7,22 +7,27 @@ import 'core/routes/app_router.dart';
 import 'core/constants/route_constants.dart';
 import 'features/auth/auth_injection_container.dart' as auth_injection;
 import 'features/auth/data/repositories/auth_repository.dart';
+import 'core/services/fcm_service_mobile.dart'
+    if (dart.library.html) 'core/services/fcm_service_web.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // Initialize dependencies
   await auth_injection.initAuthDependencies();
-
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FcmService().initFcm(context);
+      });
+    }
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthRepository>(
@@ -30,9 +35,10 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: BlocProvider<AuthBloc>(
-        create: (context) => AuthBloc(
-          authRepository: context.read<AuthRepository>(),
-        )..add(CheckAuthEvent()),
+        create:
+            (context) =>
+                AuthBloc(authRepository: context.read<AuthRepository>())
+                  ..add(CheckAuthEvent()),
         child: MaterialApp(
           title: 'Wizi Learn',
           debugShowCheckedModeBanner: false,
@@ -83,20 +89,22 @@ class MyApp extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 24,
+                ),
               ),
             ),
             textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
             ),
             outlinedButtonTheme: OutlinedButtonThemeData(
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 side: BorderSide(color: AppColors.primary),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
             inputDecorationTheme: InputDecorationTheme(
@@ -122,7 +130,10 @@ class MyApp extends StatelessWidget {
 class CustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Widget buildOverscrollIndicator(
-      BuildContext context, Widget child, ScrollableDetails details) {
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: Colors.orange.shade200,
