@@ -127,18 +127,22 @@ class _CustomScaffoldState extends State<CustomScaffold> {
                             WidgetSpan(
                               alignment: PlaceholderAlignment.middle,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.amber,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 margin: const EdgeInsets.only(bottom: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 child: const Text(
-                                  'des points !',
-                                  style: TextStyle(color: Colors.black),
+                                  '50€ ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
                                 ),
                               ),
                             ),
