@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/data/models/question_model.dart';
 
@@ -22,28 +21,34 @@ class FillBlankQuestion extends StatefulWidget {
 }
 
 class _FillBlankQuestionState extends State<FillBlankQuestion> {
-  late final Map<String, String> _answers;
-  late final Map<String, TextEditingController> _controllers;
-  late final List<String> _blanks;
+  late TextEditingController _controller;
+  late String _userAnswer;
   late Timer _timer;
   int _remainingSeconds = 30;
 
   @override
   void initState() {
     super.initState();
-    _blanks = _parseQuestionText();
-    _answers = {};
-    _controllers = {};
-    _initializeAnswers();
+    _controller = TextEditingController();
+    _userAnswer = '';
+
+    // Initialiser avec la réponse existante si disponible
+    if (widget.question.selectedAnswers != null &&
+        widget.question.selectedAnswers is Map) {
+      final answers = widget.question.selectedAnswers as Map;
+      if (answers.containsKey('reponse')) {
+        _controller.text = answers['reponse'];
+        _userAnswer = answers['reponse'];
+      }
+    }
+
     _startTimer();
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     _timer.cancel();
-    for (final controller in _controllers.values) {
-      controller.dispose();
-    }
     super.dispose();
   }
 
@@ -58,69 +63,21 @@ class _FillBlankQuestionState extends State<FillBlankQuestion> {
     });
   }
 
-  List<String> _parseQuestionText() {
-    final regex = RegExp(r'{([^}]*)}');
-    final matches = regex.allMatches(widget.question.text);
-    if (matches.isEmpty) {
-      // Si aucun trou n'est détecté, on en crée un à la fin
-      return ['réponse'];
-    }
-    return matches.map((match) => match.group(1)!).toList();
-  }
-
-  void _initializeAnswers() {
-    for (final blankId in _blanks) {
-      _controllers[blankId] = TextEditingController();
-      _answers[blankId] = '';
-    }
-
-    if (widget.question.selectedAnswers != null &&
-        widget.question.selectedAnswers is Map) {
-      final selectedAnswers =
-      Map<String, String>.from(widget.question.selectedAnswers as Map);
-      selectedAnswers.forEach((key, value) {
-        if (_controllers.containsKey(key)) {
-          _controllers[key]!.text = value;
-          _answers[key] = value;
-        }
-      });
-    }
-  }
-
-  void _handleChange(String blankId, String value) {
-    if (!mounted) return;
-
-    setState(() {
-      _answers[blankId] = value;
-    });
-
-    // Envoyer toutes les réponses sous forme de map
-    widget.onAnswer(_answers);
-  }
-
-  Widget _buildInputField(String blankId) {
-    return Container(
-      width: 200, // Largeur augmentée pour meilleure visibilité
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: TextField(
-        controller: _controllers[blankId],
-        onChanged: (value) => _handleChange(blankId, value),
-        enabled: !widget.showFeedback,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final parts = widget.question.text.split(RegExp(r'({[^}]*})'));
+    final questionText = widget.question.text;
+    final blankStart = questionText.indexOf('{');
+    final blankEnd = questionText.indexOf('}');
+
+    // Extraire les parties du texte
+    final beforeText = questionText.substring(0, blankStart);
+    final afterText = questionText.substring(blankEnd + 1);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Timer
+        // Timer (optionnel - à décommenter si besoin)
+        /*
         LinearProgressIndicator(
           value: _remainingSeconds / 30,
           backgroundColor: Colors.grey[200],
@@ -133,40 +90,40 @@ class _FillBlankQuestionState extends State<FillBlankQuestion> {
             style: const TextStyle(fontSize: 16),
           ),
         ),
+        */
 
-        // Question avec champs de saisie
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
-                  runSpacing: 8,
-                  children: parts.map((part) {
-                    if (part.startsWith('{') && part.endsWith('}')) {
-                      final blankId = part.substring(1, part.length - 1);
-                      return _buildInputField(blankId);
-                    } else if (part.isNotEmpty) {
-                      return Text(
-                        part,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }).toList(),
+        // Affichage de la question avec le champ de saisie
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (beforeText.isNotEmpty)
+                Text(beforeText, style: const TextStyle(fontSize: 18)),
+
+              // Champ de saisie pour remplacer {reponse}
+              SizedBox(
+                width: 150,
+                child: TextField(
+                  controller: _controller,
+                  onChanged: (value) {
+                    setState(() => _userAnswer = value);
+                    widget.onAnswer({'reponse': value});
+                  },
+                  decoration: InputDecoration(
+                    hintText: '______',
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  enabled: !widget.showFeedback,
                 ),
-              ],
-            ),
+              ),
+
+              if (afterText.isNotEmpty)
+                Text(afterText, style: const TextStyle(fontSize: 18)),
+            ],
           ),
         ),
       ],
