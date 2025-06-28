@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wizi_learn/features/auth/data/models/contact_model.dart';
 
@@ -97,13 +98,10 @@ class ContactCard extends StatelessWidget {
                         Flexible(
                           child: GestureDetector(
                             onTap: () async {
-                              final mailUrl = Uri(
-                                scheme: 'mailto',
-                                path: contact.user.email,
+                              await Clipboard.setData(ClipboardData(text: contact.user.email));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Adresse e-mail copiée !')),
                               );
-                              if (await canLaunchUrl(mailUrl)) {
-                                await launchUrl(mailUrl);
-                              }
                             },
                             child: Text(
                               contact.user.email,

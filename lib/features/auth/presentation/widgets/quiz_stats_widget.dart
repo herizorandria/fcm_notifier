@@ -23,17 +23,34 @@ class QuizStatsWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatTile(Icons.check_circle, 'Quiz\ncomplétés', stats.totalQuizzes.toString(), Colors.blue),
-                  _buildStatTile(Icons.star, 'Score\nmoyen', '${stats.averageScore.toStringAsFixed(2)}%', Colors.orange),
-                  _buildStatTile(Icons.emoji_events, 'Points\ntotaux', stats.totalPoints.toString(), Colors.green),
+                  _buildStatTile(
+                    Icons.check_circle,
+                    'Quiz\ncomplétés',
+                    stats.totalQuizzes.toString(),
+                    Colors.blue,
+                  ),
+                  _buildStatTile(
+                    Icons.star,
+                    'Score\nmoyen',
+                    '${stats.averageScore.toStringAsFixed(2)}%',
+                    Colors.orange,
+                  ),
+                  _buildStatTile(
+                    Icons.emoji_events,
+                    'Points\ntotaux',
+                    stats.totalPoints.toString(),
+                    Colors.green,
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
-              _buildSectionHeader('📚 Statistiques par Catégorie'),
+              _buildSectionHeader('📚 Statistiques par catégorie'),
               const SizedBox(height: 8),
-              ...stats.categoryStats.map((category) => _buildCategoryStat(category)),
+              ...stats.categoryStats.map(
+                (category) => _buildCategoryStat(category),
+              ),
               const SizedBox(height: 24),
-              _buildSectionHeader('🎯 Progression par Niveau'),
+              _buildSectionHeader('🎯 Progression par niveau'),
               const SizedBox(height: 8),
               _buildLevelProgress(stats.levelProgress),
             ],
@@ -54,7 +71,12 @@ class QuizStatsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatTile(IconData icon, String label, String value, Color color) {
+  Widget _buildStatTile(
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Column(
       children: [
         CircleAvatar(
@@ -63,9 +85,16 @@ class QuizStatsWidget extends StatelessWidget {
           child: Icon(icon, color: color, size: 28),
         ),
         const SizedBox(height: 8),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         const SizedBox(height: 4),
-        Text(label, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54)),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.black54),
+        ),
       ],
     );
   }
@@ -82,13 +111,18 @@ class QuizStatsWidget extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           LinearProgressIndicator(
-            value: stats.totalQuizzes == 0 ? 0 : category.quizCount / stats.totalQuizzes,
+            value:
+                stats.totalQuizzes == 0
+                    ? 0
+                    : category.quizCount / stats.totalQuizzes,
             backgroundColor: Colors.grey[200],
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             minHeight: 6,
           ),
           const SizedBox(height: 4),
-          Text('${category.quizCount} quiz - Moyenne: ${category.averageScore.toStringAsFixed(2)}'),
+          Text(
+            '${category.quizCount} quiz - Moyenne: ${(category.averageScore is double ? category.averageScore : (category.averageScore as int).toDouble()).toStringAsFixed(2)}',
+          ),
         ],
       ),
     );
@@ -122,7 +156,9 @@ class QuizStatsWidget extends StatelessWidget {
             minHeight: 6,
           ),
           const SizedBox(height: 4),
-          Text('${data.completed} quiz - Moyenne: ${data.averageScore?.toStringAsFixed(2) ?? 'N/A'}'),
+          Text(
+            '${data.completed} quiz - Moyenne: ${data.averageScore == null ? '0' : (data.averageScore is double ? data.averageScore!.toStringAsFixed(2) : (data.averageScore as int).toDouble().toStringAsFixed(2))}',
+          ),
         ],
       ),
     );

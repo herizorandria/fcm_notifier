@@ -73,7 +73,10 @@ class GlobalRanking {
       stagiaire: Stagiaire.fromJson(json['stagiaire']),
       totalPoints: json['totalPoints'],
       quizCount: json['quizCount'],
-      averageScore: json['averageScore'],
+      averageScore:
+          (json['averageScore'] is int)
+              ? (json['averageScore'] as int).toDouble()
+              : json['averageScore'],
       rang: json['rang'],
     );
   }
