@@ -139,7 +139,10 @@ class CategoryStat {
     return CategoryStat(
       category: json['category'],
       quizCount: json['quizCount'],
-      averageScore: json['averageScore'],
+      averageScore:
+          (json['averageScore'] is int)
+              ? (json['averageScore'] as int).toDouble()
+              : json['averageScore'],
     );
   }
 }
@@ -173,7 +176,10 @@ class LevelData {
   factory LevelData.fromJson(Map<String, dynamic> json) {
     return LevelData(
       completed: json['completed'],
-      averageScore: json['averageScore'],
+      averageScore:
+          (json['averageScore'] is int)
+              ? (json['averageScore'] as int).toDouble()
+              : json['averageScore'],
     );
   }
 }
