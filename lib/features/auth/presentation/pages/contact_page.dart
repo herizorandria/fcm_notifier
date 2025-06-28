@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wizi_learn/features/auth/data/models/contact_model.dart';
-import 'package:wizi_learn/features/auth/presentation/widgets/contact_card.dart';
+import 'package:wizi_learn/features/auth/presentation/components/contact_card.dart';
 
 class ContactPage extends StatelessWidget {
   final List<Contact> contacts;

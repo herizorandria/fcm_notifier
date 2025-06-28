@@ -8,7 +8,11 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: CustomScaffold(child: Text('Test')), // Ajout d'un child minimal
+        home: CustomScaffold(
+          body: Text('Test'), // Ajout d'un body minimal
+          currentIndex: 0, // Valeur par défaut pour le test
+          onTabSelected: (_) {}, // Callback vide pour le test
+        ), // Ajout des paramètres requis
       ),
     );
     expect(find.byType(CustomScaffold), findsOneWidget);

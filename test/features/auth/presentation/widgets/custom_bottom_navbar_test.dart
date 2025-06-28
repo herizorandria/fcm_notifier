@@ -9,13 +9,16 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          bottomNavigationBar: CustomBottomNavbar(
-            selectedIndex: 0,
-            onItemTapped: (_) {},
+          bottomNavigationBar: CustomBottomNavBar(
+            currentIndex: 0,
+            onTap: (_) {},
+            backgroundColor: Colors.white,
+            selectedColor: Colors.blue,
+            unselectedColor: Colors.grey,
           ),
         ),
       ),
     );
-    expect(find.byType(CustomBottomNavbar), findsOneWidget);
+    expect(find.byType(CustomBottomNavBar), findsOneWidget);
   });
 }

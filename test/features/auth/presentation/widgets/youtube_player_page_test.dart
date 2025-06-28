@@ -7,7 +7,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(home: YoutubePlayerPage(videoId: 'dQw4w9WgXcQ')),
+      MaterialApp(
+        home: YoutubePlayerPage(
+          video: /* provide a mock or test video object here */,
+          videosInSameCategory: /* provide a mock or test list of videos here */,
+        ),
+      ),
     );
     expect(find.byType(YoutubePlayerPage), findsOneWidget);
   });

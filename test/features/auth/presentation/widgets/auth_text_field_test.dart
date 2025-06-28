@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wizi_learn/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:wizi_learn/features/auth/presentation/components/auth_text_field.dart';
 
 void main() {
   testWidgets('AuthTextField se construit sans erreur', (
@@ -12,6 +12,7 @@ void main() {
           body: AuthTextField(
             controller: TextEditingController(),
             labelText: 'Test',
+            hintText: 'Enter your test value',
             prefixIcon: Icons.person,
           ),
         ),

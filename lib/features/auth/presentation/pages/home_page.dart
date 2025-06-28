@@ -7,7 +7,7 @@ import 'package:wizi_learn/features/auth/data/models/formation_model.dart';
 import 'package:wizi_learn/features/auth/data/repositories/contact_repository.dart';
 import 'package:wizi_learn/features/auth/data/repositories/formation_repository.dart';
 import 'package:wizi_learn/features/auth/presentation/pages/contact_page.dart';
-import 'package:wizi_learn/features/auth/presentation/widgets/contact_card.dart';
+import 'package:wizi_learn/features/auth/presentation/components/contact_card.dart';
 import 'package:wizi_learn/features/auth/presentation/widgets/random_formations_widget.dart';
 
 class HomePage extends StatefulWidget {
